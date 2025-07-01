@@ -1,5 +1,8 @@
 package com.prelightwight.aibrother.images
 
+import com.prelightwight.aibrother.ai.AIModelManager
+import com.prelightwight.aibrother.data.AppDatabase
+import com.prelightwight.aibrother.data.AnalyzedImageEntity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -27,6 +30,9 @@ import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import java.io.File
+import java.io.FileOutputStream
+import android.util.Log
 
 data class AnalyzedImage(
     val id: String,
@@ -49,10 +55,26 @@ data class ImageAnalysis(
 @Composable
 fun ImageScreen() {
     val context = LocalContext.current
-    var analyzedImages by remember { mutableStateOf(listOf<AnalyzedImage>()) }
-    var isAnalyzing by remember { mutableStateOf(false) }
-    var selectedImage by remember { mutableStateOf<AnalyzedImage?>(null) }
     val scope = rememberCoroutineScope()
+    
+    // AI Manager and Database
+    val aiManager = remember { AIModelManager.getInstance(context) }
+    val database = remember { AppDatabase.getDatabase(context) }
+    
+    // State
+    var analyzedImages by remember { mutableStateOf(listOf<AnalyzedImageEntity>()) }
+    var isAnalyzing by remember { mutableStateOf(false) }
+    var selectedImage by remember { mutableStateOf<AnalyzedImageEntity?>(null) }
+    
+    // Initialize AI manager and load images
+    LaunchedEffect(Unit) {
+        aiManager.initialize()
+        
+        // Load analyzed images from database
+        database.analyzedImageDao().getAllImages().collect { images ->
+            analyzedImages = images
+        }
+    }
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents(),
@@ -60,10 +82,32 @@ fun ImageScreen() {
             if (uris.isNotEmpty()) {
                 scope.launch {
                     isAnalyzing = true
-                    val newAnalyzedImages = uris.mapNotNull { uri ->
-                        analyzeImage(context, uri)
+                    
+                    uris.forEach { uri ->
+                        try {
+                            val bitmap = loadBitmapFromUri(context, uri)
+                            if (bitmap != null) {
+                                val fileName = getImageFileName(context, uri)
+                                val analysis = aiManager.analyzeImage(bitmap)
+                                
+                                val imageEntity = AnalyzedImageEntity(
+                                    filename = fileName,
+                                    originalUri = uri.toString(),
+                                    localPath = saveImageToInternalStorage(context, bitmap, fileName),
+                                    description = analysis.description,
+                                    detectedObjects = analysis.objects.joinToString(","),
+                                    dominantColors = analysis.colors.joinToString(","),
+                                    extractedText = analysis.text,
+                                    confidence = analysis.confidence
+                                )
+                                
+                                database.analyzedImageDao().insertImage(imageEntity)
+                            }
+                        } catch (e: Exception) {
+                            Log.e("ImageScreen", "Error analyzing image", e)
+                        }
                     }
-                    analyzedImages = analyzedImages + newAnalyzedImages
+                    
                     isAnalyzing = false
                 }
             }
@@ -489,4 +533,22 @@ private fun performImageAnalysis(bitmap: Bitmap): ImageAnalysis {
         description = descriptions.random(),
         confidence = 0.75f + kotlin.random.Random.nextFloat() * 0.2f // 0.75-0.95
     )
+}
+
+private fun saveImageToInternalStorage(context: Context, bitmap: Bitmap, fileName: String): String {
+    val imageDir = File(context.filesDir, "analyzed_images")
+    if (!imageDir.exists()) {
+        imageDir.mkdirs()
+    }
+    
+    val imageFile = File(imageDir, fileName)
+    return try {
+        FileOutputStream(imageFile).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+        }
+        imageFile.absolutePath
+    } catch (e: Exception) {
+        Log.e("ImageScreen", "Error saving image", e)
+        ""
+    }
 }

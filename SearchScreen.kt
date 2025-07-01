@@ -1,5 +1,8 @@
 package com.prelightwight.aibrother.search
 
+import com.prelightwight.aibrother.network.WebSearchEngine
+import com.prelightwight.aibrother.data.AppDatabase
+import com.prelightwight.aibrother.data.SearchHistoryEntity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -45,37 +48,92 @@ data class SearchQuery(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    
+    // Managers and database
+    val searchEngine = remember { WebSearchEngine.getInstance(context) }
+    val database = remember { AppDatabase.getDatabase(context) }
+    
+    // State
     var searchQuery by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
     var useTor by remember { mutableStateOf(false) }
     var searchResults by remember { mutableStateOf(listOf<SearchResult>()) }
-    var searchHistory by remember { mutableStateOf(listOf<SearchQuery>()) }
+    var searchHistory by remember { mutableStateOf(listOf<SearchHistoryEntity>()) }
     var showHistory by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+    var suggestions by remember { mutableStateOf(listOf<String>()) }
+    var torAvailable by remember { mutableStateOf(false) }
+    
+    // Initialize search engine and load history
+    LaunchedEffect(Unit) {
+        searchEngine.initialize()
+        torAvailable = searchEngine.isTorSupported()
+        
+        // Load search history
+        database.searchHistoryDao().getRecentSearches().collect { history ->
+            searchHistory = history
+        }
+    }
+    
+    // Get search suggestions as user types
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.length >= 2) {
+            scope.launch {
+                try {
+                    suggestions = searchEngine.getSearchSuggestions(searchQuery)
+                } catch (e: Exception) {
+                    // Ignore suggestion errors
+                }
+            }
+        } else {
+            suggestions = emptyList()
+        }
+    }
 
-    fun performSearch(query: String) {
+    suspend fun performSearch(query: String) {
         if (query.isBlank()) return
         
-        scope.launch {
-            isSearching = true
+        isSearching = true
+        showHistory = false
+        
+        try {
+            // Perform actual web search
+            val results = searchEngine.search(query, useTor)
+            searchResults = results.map { networkResult ->
+                SearchResult(
+                    id = networkResult.id,
+                    title = networkResult.title,
+                    url = networkResult.url,
+                    snippet = networkResult.snippet,
+                    timestamp = networkResult.timestamp,
+                    source = networkResult.source
+                )
+            }
             
-            // Simulate search delay
-            delay(if (useTor) 3000 else 1500)
-            
-            val results = generateMockSearchResults(query, if (useTor) SearchSource.TOR else SearchSource.CLEARNET)
-            searchResults = results
-            
-            // Add to history
-            val historyEntry = SearchQuery(
+            // Save to database
+            val historyEntry = SearchHistoryEntity(
                 query = query,
-                timestamp = System.currentTimeMillis(),
-                source = if (useTor) SearchSource.TOR else SearchSource.CLEARNET,
-                resultCount = results.size
+                source = if (useTor) "TOR" else "CLEARNET",
+                resultCount = searchResults.size,
+                results = "" // Could store JSON of results if needed
             )
-            searchHistory = listOf(historyEntry) + searchHistory.take(19) // Keep last 20
+            database.searchHistoryDao().insertSearch(historyEntry)
             
+        } catch (e: Exception) {
+            // Show error in results
+            searchResults = listOf(
+                SearchResult(
+                    id = "error",
+                    title = "Search Error",
+                    url = "",
+                    snippet = "Unable to perform search: ${e.message}",
+                    timestamp = System.currentTimeMillis(),
+                    source = if (useTor) SearchSource.TOR else SearchSource.CLEARNET
+                )
+            )
+        } finally {
             isSearching = false
-            showHistory = false
         }
     }
 
@@ -171,9 +229,42 @@ fun SearchScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Search suggestions
+        if (suggestions.isNotEmpty() && searchQuery.isNotBlank()) {
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    suggestions.forEach { suggestion ->
+                        TextButton(
+                            onClick = { 
+                                searchQuery = suggestion
+                                scope.launch { performSearch(suggestion) }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.TrendingUp,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(suggestion, modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
         // Search button
         Button(
-            onClick = { performSearch(searchQuery) },
+            onClick = { scope.launch { performSearch(searchQuery) } },
             modifier = Modifier.fillMaxWidth(),
             enabled = searchQuery.isNotBlank() && !isSearching
         ) {
@@ -188,6 +279,33 @@ fun SearchScreen() {
                 Icon(Icons.Default.Search, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Search via ${if (useTor) "Tor" else "Clearnet"}")
+            }
+        }
+        
+        // Network status indicator
+        if (useTor && !torAvailable) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "Tor network not available. Falling back to clearnet.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
             }
         }
 
@@ -356,7 +474,7 @@ fun SearchResultItem(result: SearchResult) {
 }
 
 @Composable
-fun SearchHistoryItem(query: SearchQuery, onClick: () -> Unit) {
+fun SearchHistoryItem(query: SearchHistoryEntity, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -384,7 +502,7 @@ fun SearchHistoryItem(query: SearchQuery, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${query.resultCount} results • ${query.source.displayName} • ${SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(query.timestamp))}",
+                    text = "${query.resultCount} results • ${query.source} • ${SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(query.timestamp))}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
