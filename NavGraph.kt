@@ -12,30 +12,46 @@ import com.prelightwight.aibrother.images.ImageScreen
 import com.prelightwight.aibrother.knowledge.KnowledgeScreen
 import com.prelightwight.aibrother.search.SearchScreen
 import com.prelightwight.aibrother.settings.SettingsScreen
+import com.prelightwight.aibrother.tutorial.TutorialScreen
+import com.prelightwight.aibrother.tutorial.WithTutorial
 
 @Composable
 fun NavGraph(navController: NavHostController, padding: PaddingValues) {
     NavHost(navController = navController, startDestination = Screen.Chat.route) {
         composable(Screen.Chat.route) {
-            ChatScreen()
+            WithTutorial(screen = TutorialScreen.CHAT) {
+                ChatScreen()
+            }
         }
         composable(Screen.Brain.route) {
-            BrainScreen()
+            WithTutorial(screen = TutorialScreen.BRAIN) {
+                BrainScreen()
+            }
         }
         composable(Screen.Files.route) {
-            FileScreen()
+            WithTutorial(screen = TutorialScreen.FILES) {
+                FileScreen()
+            }
         }
         composable(Screen.Knowledge.route) {
-            KnowledgeScreen()
+            WithTutorial(screen = TutorialScreen.KNOWLEDGE) {
+                KnowledgeScreen()
+            }
         }
         composable(Screen.Search.route) {
-            SearchScreen()
+            WithTutorial(screen = TutorialScreen.SEARCH) {
+                SearchScreen()
+            }
         }
         composable(Screen.Images.route) {
-            ImageScreen()
+            WithTutorial(screen = TutorialScreen.IMAGES) {
+                ImageScreen()
+            }
         }
         composable(Screen.Settings.route) {
-            SettingsScreen()
+            WithTutorial(screen = TutorialScreen.SETTINGS) {
+                SettingsScreen()
+            }
         }
     }
 }

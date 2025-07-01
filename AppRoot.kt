@@ -10,15 +10,19 @@ import com.prelightwight.aibrother.chat.ChatScreen
 import com.prelightwight.aibrother.files.FileScreen
 import com.prelightwight.aibrother.knowledge.KnowledgeScreen
 import com.prelightwight.aibrother.settings.SettingsScreen
+import com.prelightwight.aibrother.tutorial.TutorialScreen
+import com.prelightwight.aibrother.tutorial.WithTutorial
 
 @Composable
 fun AppRoot() {
     val navController = rememberNavController()
 
-    Scaffold(
-        bottomBar = { BottomNavBar(navController) }
-    ) { paddingValues ->
-        NavGraph(navController = navController, padding = paddingValues)
+    WithTutorial(screen = TutorialScreen.WELCOME) {
+        Scaffold(
+            bottomBar = { BottomNavBar(navController) }
+        ) { paddingValues ->
+            NavGraph(navController = navController, padding = paddingValues)
+        }
     }
 }
 
