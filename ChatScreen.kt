@@ -1,6 +1,7 @@
 package com.prelightwight.aibrother.chat
 
 import android.net.Uri
+import com.prelightwight.aibrother.llm.LlamaRunner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -91,11 +92,18 @@ LlamaRunner.init(context)
                 keyboardActions = KeyboardActions(
                     onSend = {
                         if (currentInput.isNotBlank()) {
-                            messages = messages + "You: $currentInput"
-                            // Simulated response (stub)
-                            messages = messages + "AI: ${currentInput.reversed()}"
+                            val userMessage = currentInput
+                            messages = messages + "You: $userMessage"
                             currentInput = ""
                             keyboardController?.hide()
+                            
+                            // Get AI response
+                            val aiResponse = try {
+                                LlamaRunner.infer(userMessage)
+                            } catch (e: Exception) {
+                                "Error: Unable to get AI response. Please ensure a model is loaded."
+                            }
+                            messages = messages + "AI: $aiResponse"
                         }
                     }
                 ),
@@ -104,11 +112,18 @@ LlamaRunner.init(context)
             IconButton(
                 onClick = {
                     if (currentInput.isNotBlank()) {
-                        messages = messages + "You: $currentInput"
-                        // Simulated response (stub)
-                        messages = messages + "AI: ${currentInput.reversed()}"
+                        val userMessage = currentInput
+                        messages = messages + "You: $userMessage"
                         currentInput = ""
                         keyboardController?.hide()
+                        
+                        // Get AI response
+                        val aiResponse = try {
+                            LlamaRunner.infer(userMessage)
+                        } catch (e: Exception) {
+                            "Error: Unable to get AI response. Please ensure a model is loaded."
+                        }
+                        messages = messages + "AI: $aiResponse"
                     }
                 }
             ) {
