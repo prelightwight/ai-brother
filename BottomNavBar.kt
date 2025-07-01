@@ -19,6 +19,7 @@ sealed class Screen(val route: String, val label: String, val icon: @Composable 
     object Knowledge : Screen("knowledge", "Knowledge", { Icon(Icons.Default.MenuBook, contentDescription = null) })
     object Search : Screen("search", "Search", { Icon(Icons.Default.Search, contentDescription = null) })
     object Images : Screen("images", "Images", { Icon(Icons.Default.Image, contentDescription = null) })
+    object LLMManagement : Screen("llm_management", "AI Models", { Icon(Icons.Default.SmartToy, contentDescription = null) })
     object Settings : Screen("settings", "Settings", { Icon(Icons.Default.Settings, contentDescription = null) })
 }
 
@@ -30,7 +31,7 @@ fun BottomNavBar(navController: NavHostController) {
     )
     
     val secondaryItems = listOf(
-        Screen.Search, Screen.Images, Screen.Settings
+        Screen.Search, Screen.Images, Screen.LLMManagement, Screen.Settings
     )
 
     NavigationBar {

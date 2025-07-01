@@ -10,6 +10,7 @@ import com.prelightwight.aibrother.chat.ChatScreen
 import com.prelightwight.aibrother.files.FileScreen
 import com.prelightwight.aibrother.images.ImageScreen
 import com.prelightwight.aibrother.knowledge.KnowledgeScreen
+import com.prelightwight.aibrother.llm.LLMManagementScreen
 import com.prelightwight.aibrother.search.SearchScreen
 import com.prelightwight.aibrother.settings.SettingsScreen
 import com.prelightwight.aibrother.tutorial.TutorialScreen
@@ -20,7 +21,11 @@ fun NavGraph(navController: NavHostController, padding: PaddingValues) {
     NavHost(navController = navController, startDestination = Screen.Chat.route) {
         composable(Screen.Chat.route) {
             WithTutorial(screen = TutorialScreen.CHAT) {
-                ChatScreen()
+                ChatScreen(
+                    onNavigateToLLMManagement = {
+                        navController.navigate(Screen.LLMManagement.route)
+                    }
+                )
             }
         }
         composable(Screen.Brain.route) {
@@ -47,6 +52,11 @@ fun NavGraph(navController: NavHostController, padding: PaddingValues) {
             WithTutorial(screen = TutorialScreen.IMAGES) {
                 ImageScreen()
             }
+        }
+        composable(Screen.LLMManagement.route) {
+            LLMManagementScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
         composable(Screen.Settings.route) {
             WithTutorial(screen = TutorialScreen.SETTINGS) {

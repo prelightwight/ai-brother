@@ -38,7 +38,9 @@ import java.util.*
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun ChatScreen() {
+fun ChatScreen(
+    onNavigateToLLMManagement: () -> Unit = {}
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     
@@ -147,10 +149,29 @@ LlamaRunner.init(context)
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Button(onClick = {
-            modelPickerLauncher.launch(arrayOf("*/*")) // Optionally filter to .gguf
-        }) {
-            Text("🧠 Load Model File")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {
+                    modelPickerLauncher.launch(arrayOf("*/*")) // Optionally filter to .gguf
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Default.Upload, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Load Model File")
+            }
+            
+            OutlinedButton(
+                onClick = onNavigateToLLMManagement,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Default.Download, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Get Models")
+            }
         }
 
         selectedModelUri?.let {
