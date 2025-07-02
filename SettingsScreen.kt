@@ -31,7 +31,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    onNavigateToModels: () -> Unit = {}
+) {
     var showModelSettings by remember { mutableStateOf(false) }
     var showPrivacySettings by remember { mutableStateOf(false) }
     var showAppInfo by remember { mutableStateOf(false) }
@@ -82,6 +84,13 @@ fun SettingsScreen() {
             // AI Model Configuration
             item {
                 SettingsSection(title = "🤖 AI Configuration") {
+                    SettingsCard(
+                        title = "Model Management",
+                        subtitle = "Download and manage LLM models",
+                        icon = Icons.Default.Download,
+                        onClick = onNavigateToModels
+                    )
+                    
                     SettingsCard(
                         title = "Model Parameters",
                         subtitle = "Configure AI inference settings",

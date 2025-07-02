@@ -10,6 +10,7 @@ import com.prelightwight.aibrother.chat.ChatScreen
 import com.prelightwight.aibrother.files.FileScreen
 import com.prelightwight.aibrother.knowledge.KnowledgeScreen
 import com.prelightwight.aibrother.settings.SettingsScreen
+import com.prelightwight.aibrother.models.ModelManagementScreen
 
 @Composable
 fun NavGraph(navController: NavHostController, padding: PaddingValues) {
@@ -27,7 +28,27 @@ fun NavGraph(navController: NavHostController, padding: PaddingValues) {
             KnowledgeScreen()
         }
         composable(Screen.Settings.route) {
-            SettingsScreen()
+            SettingsScreen(
+                onNavigateToModels = {
+                    navController.navigate("models")
+                }
+            )
+        }
+        composable("models") {
+            ModelManagementScreen(
+                onModelSelected = { modelId ->
+                    // Navigate back to chat and load selected model
+                    navController.popBackStack()
+                    navController.navigate("chat/${modelId}")
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable("chat/{modelId}") { backStackEntry ->
+            val modelId = backStackEntry.arguments?.getString("modelId")
+            ChatScreen(selectedModelId = modelId)
         }
     }
 }
