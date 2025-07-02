@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "com.prelightwight.aibrother.app-merged_res-63:/xml_file_paths.xml.flat",
+        "source": "com.prelightwight.aibrother.app-main-65:/xml/file_paths.xml"
+    },
+    {
+        "merged": "com.prelightwight.aibrother.app-merged_res-63:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.prelightwight.aibrother.app-main-65:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.prelightwight.aibrother.app-merged_res-63:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.prelightwight.aibrother.app-main-65:/mipmap-anydpi-v26/ic_launcher.xml"
+    }
+]

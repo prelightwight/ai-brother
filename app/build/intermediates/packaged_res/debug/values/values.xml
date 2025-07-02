@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_500">#6200EE</color>
+    <color name="teal_200">#03DAC6</color>
+    <string name="app_name">AI Brother</string>
+    <style name="Base.Theme.AIBrother" parent="Theme.AppCompat.Light.DarkActionBar">
+        
+        
+    </style>
+    <style name="Theme.AIBrother" parent="Base.Theme.AIBrother"/>
+</resources>

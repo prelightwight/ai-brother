@@ -1,0 +1,10 @@
+R_DEF: Internal format may change without notice
+local
+color purple_500
+color teal_200
+drawable ic_launcher_foreground
+mipmap ic_launcher
+string app_name
+style Base.Theme.AIBrother
+style Theme.AIBrother
+xml file_paths
