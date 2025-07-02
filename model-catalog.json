@@ -1,0 +1,364 @@
+{
+  "version": "1.2.0",
+  "updated": "2024-01-01T00:00:00Z",
+  "models": [
+    {
+      "id": "phi_2_mobile",
+      "name": "Phi-2 Mobile Optimized",
+      "description": "Microsoft's compact but powerful 2.7B parameter model, specifically optimized for mobile devices with excellent reasoning and coding capabilities.",
+      "version": "1.0.0",
+      "size_bytes": 1600000000,
+      "size_display": "1.6 GB",
+      "filename": "phi-2-mobile-q4_k_m.gguf",
+      "parameters": "2.7B",
+      "quantization": "Q4_K_M",
+      "context_length": 2048,
+      "use_case": "Mobile-optimized, general conversation, coding, reasoning",
+      "tags": ["mobile", "coding", "reasoning", "compact", "microsoft"],
+      "license": "MIT",
+      "author": "Microsoft",
+      "sha256": "a1b2c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789abc",
+      "download_urls": [
+        {
+          "name": "Primary CDN",
+          "url": "https://cdn.aibrother.app/models/phi-2-mobile-q4_k_m.gguf",
+          "priority": 1,
+          "location": "GLOBAL",
+          "type": "CDN"
+        },
+        {
+          "name": "AWS S3 US",
+          "url": "https://aibrother-models.s3.us-east-1.amazonaws.com/phi-2-mobile-q4_k_m.gguf",
+          "priority": 2,
+          "location": "US",
+          "type": "CDN"
+        },
+        {
+          "name": "Cloudflare R2",
+          "url": "https://models.aibrother.app/phi-2-mobile-q4_k_m.gguf",
+          "priority": 2,
+          "location": "GLOBAL",
+          "type": "CDN"
+        },
+        {
+          "name": "HuggingFace Hub",
+          "url": "https://huggingface.co/microsoft/phi-2-GGUF/resolve/main/phi-2.q4_k_m.gguf",
+          "priority": 3,
+          "location": "GLOBAL",
+          "type": "DIRECT"
+        }
+      ],
+      "recommended_ram_gb": 3,
+      "performance_score": 8.5,
+      "quality_score": 8.0
+    },
+    {
+      "id": "nous_hermes_2_mistral_7b",
+      "name": "Nous Hermes 2 - Mistral 7B",
+      "description": "Fine-tuned Mistral 7B model with excellent instruction following capabilities, trained on diverse high-quality datasets for superior conversation quality.",
+      "version": "1.0.0",
+      "size_bytes": 4100000000,
+      "size_display": "4.1 GB",
+      "filename": "nous-hermes-2-mistral-7b-q4_k_m.gguf",
+      "parameters": "7B",
+      "quantization": "Q4_K_M",
+      "context_length": 8192,
+      "use_case": "General conversation, instruction following, creative tasks",
+      "tags": ["conversation", "instruction", "creative", "7b", "mistral"],
+      "license": "Apache-2.0",
+      "author": "NousResearch",
+      "sha256": "b2c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789abcde",
+      "download_urls": [
+        {
+          "name": "Primary CDN",
+          "url": "https://cdn.aibrother.app/models/nous-hermes-2-mistral-7b-q4_k_m.gguf",
+          "priority": 1,
+          "location": "GLOBAL",
+          "type": "CDN"
+        },
+        {
+          "name": "AWS S3 US",
+          "url": "https://aibrother-models.s3.us-east-1.amazonaws.com/nous-hermes-2-mistral-7b-q4_k_m.gguf",
+          "priority": 2,
+          "location": "US",
+          "type": "CDN"
+        },
+        {
+          "name": "AWS S3 EU",
+          "url": "https://aibrother-models-eu.s3.eu-west-1.amazonaws.com/nous-hermes-2-mistral-7b-q4_k_m.gguf",
+          "priority": 2,
+          "location": "EU",
+          "type": "CDN"
+        },
+        {
+          "name": "HuggingFace Hub",
+          "url": "https://huggingface.co/NousResearch/Nous-Hermes-2-Mistral-7B-DPO-GGUF/resolve/main/Nous-Hermes-2-Mistral-7B-DPO.Q4_K_M.gguf",
+          "priority": 3,
+          "location": "GLOBAL",
+          "type": "DIRECT"
+        }
+      ],
+      "recommended_ram_gb": 6,
+      "performance_score": 9.0,
+      "quality_score": 9.2
+    },
+    {
+      "id": "openhermes_2_5_mistral",
+      "name": "OpenHermes 2.5 Mistral 7B",
+      "description": "Enhanced version of OpenHermes with improved reasoning, creative writing, and complex problem-solving capabilities. Excellent for diverse conversational AI tasks.",
+      "version": "2.5.0",
+      "size_bytes": 4100000000,
+      "size_display": "4.1 GB",
+      "filename": "openhermes-2.5-mistral-7b-q4_k_m.gguf",
+      "parameters": "7B",
+      "quantization": "Q4_K_M",
+      "context_length": 8192,
+      "use_case": "Creative writing, complex reasoning, problem solving",
+      "tags": ["creative", "reasoning", "writing", "7b", "enhanced"],
+      "license": "Apache-2.0",
+      "author": "Teknium",
+      "sha256": "c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "download_urls": [
+        {
+          "name": "Primary CDN",
+          "url": "https://cdn.aibrother.app/models/openhermes-2.5-mistral-7b-q4_k_m.gguf",
+          "priority": 1,
+          "location": "GLOBAL",
+          "type": "CDN"
+        },
+        {
+          "name": "AWS S3 US",
+          "url": "https://aibrother-models.s3.us-east-1.amazonaws.com/openhermes-2.5-mistral-7b-q4_k_m.gguf",
+          "priority": 2,
+          "location": "US",
+          "type": "CDN"
+        },
+        {
+          "name": "HuggingFace Hub",
+          "url": "https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B-GGUF/resolve/main/openhermes-2.5-mistral-7b.q4_k_m.gguf",
+          "priority": 3,
+          "location": "GLOBAL",
+          "type": "DIRECT"
+        }
+      ],
+      "recommended_ram_gb": 6,
+      "performance_score": 9.1,
+      "quality_score": 9.3
+    },
+    {
+      "id": "dolphin_2_7_mistral",
+      "name": "Dolphin 2.7 Mistral 7B",
+      "description": "Latest version of the Dolphin series with improved reasoning, coding abilities, and uncensored responses. Excellent for technical tasks and creative applications.",
+      "version": "2.7.0",
+      "size_bytes": 4100000000,
+      "size_display": "4.1 GB",
+      "filename": "dolphin-2.7-mistral-7b-q4_k_m.gguf",
+      "parameters": "7B",
+      "quantization": "Q4_K_M",
+      "context_length": 8192,
+      "use_case": "Advanced reasoning, coding, technical analysis, uncensored",
+      "tags": ["coding", "reasoning", "technical", "uncensored", "dolphin"],
+      "license": "Apache-2.0",
+      "author": "Eric Hartford",
+      "sha256": "d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0",
+      "download_urls": [
+        {
+          "name": "Primary CDN",
+          "url": "https://cdn.aibrother.app/models/dolphin-2.7-mistral-7b-q4_k_m.gguf",
+          "priority": 1,
+          "location": "GLOBAL",
+          "type": "CDN"
+        },
+        {
+          "name": "AWS S3 US",
+          "url": "https://aibrother-models.s3.us-east-1.amazonaws.com/dolphin-2.7-mistral-7b-q4_k_m.gguf",
+          "priority": 2,
+          "location": "US",
+          "type": "CDN"
+        },
+        {
+          "name": "HuggingFace Hub",
+          "url": "https://huggingface.co/cognitivecomputations/dolphin-2.7-mistral-7b-GGUF/resolve/main/dolphin-2.7-mistral-7b.Q4_K_M.gguf",
+          "priority": 3,
+          "location": "GLOBAL",
+          "type": "DIRECT"
+        }
+      ],
+      "recommended_ram_gb": 6,
+      "performance_score": 9.2,
+      "quality_score": 8.8
+    },
+    {
+      "id": "mythomax_l2_13b",
+      "name": "MythoMax L2 13B",
+      "description": "Specialized 13B model for creative writing, storytelling, and roleplay scenarios. Based on LLaMA 2 with enhanced creative capabilities and narrative understanding.",
+      "version": "1.0.0",
+      "size_bytes": 7300000000,
+      "size_display": "7.3 GB",
+      "filename": "mythomax-l2-13b-q4_k_m.gguf",
+      "parameters": "13B",
+      "quantization": "Q4_K_M",
+      "context_length": 4096,
+      "use_case": "Creative writing, storytelling, roleplay, narrative generation",
+      "tags": ["creative", "storytelling", "roleplay", "13b", "narrative"],
+      "license": "Custom",
+      "author": "Gryphe",
+      "sha256": "e5f6789abcdef0123456789abcdef0123456789abcdef0123456789abcdef012",
+      "download_urls": [
+        {
+          "name": "Primary CDN",
+          "url": "https://cdn.aibrother.app/models/mythomax-l2-13b-q4_k_m.gguf",
+          "priority": 1,
+          "location": "GLOBAL",
+          "type": "CDN"
+        },
+        {
+          "name": "AWS S3 US",
+          "url": "https://aibrother-models.s3.us-east-1.amazonaws.com/mythomax-l2-13b-q4_k_m.gguf",
+          "priority": 2,
+          "location": "US",
+          "type": "CDN"
+        },
+        {
+          "name": "HuggingFace Hub",
+          "url": "https://huggingface.co/TheBloke/MythoMax-L2-13B-GGUF/resolve/main/mythomax-l2-13b.Q4_K_M.gguf",
+          "priority": 3,
+          "location": "GLOBAL",
+          "type": "DIRECT"
+        }
+      ],
+      "recommended_ram_gb": 10,
+      "performance_score": 8.8,
+      "quality_score": 9.5
+    },
+    {
+      "id": "chronos_hermes_13b",
+      "name": "Chronos Hermes 13B",
+      "description": "Balanced 13B model that excels at both creative and analytical tasks. Combines the strengths of Chronos and Hermes models for versatile AI assistance.",
+      "version": "1.0.0",
+      "size_bytes": 7300000000,
+      "size_display": "7.3 GB",
+      "filename": "chronos-hermes-13b-q4_k_m.gguf",
+      "parameters": "13B",
+      "quantization": "Q4_K_M",
+      "context_length": 4096,
+      "use_case": "Balanced creative and analytical tasks, general assistance",
+      "tags": ["balanced", "analytical", "creative", "13b", "versatile"],
+      "license": "Custom",
+      "author": "Austism",
+      "sha256": "f6789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01234",
+      "download_urls": [
+        {
+          "name": "Primary CDN",
+          "url": "https://cdn.aibrother.app/models/chronos-hermes-13b-q4_k_m.gguf",
+          "priority": 1,
+          "location": "GLOBAL",
+          "type": "CDN"
+        },
+        {
+          "name": "AWS S3 US",
+          "url": "https://aibrother-models.s3.us-east-1.amazonaws.com/chronos-hermes-13b-q4_k_m.gguf",
+          "priority": 2,
+          "location": "US",
+          "type": "CDN"
+        },
+        {
+          "name": "HuggingFace Hub",
+          "url": "https://huggingface.co/TheBloke/Chronos-Hermes-13B-GGUF/resolve/main/chronos-hermes-13b.Q4_K_M.gguf",
+          "priority": 3,
+          "location": "GLOBAL",
+          "type": "DIRECT"
+        }
+      ],
+      "recommended_ram_gb": 10,
+      "performance_score": 8.9,
+      "quality_score": 9.0
+    },
+    {
+      "id": "solar_10_7b_instruct",
+      "name": "Solar 10.7B Instruct",
+      "description": "High-performance instruction-following model with excellent reasoning capabilities. Optimized for complex tasks and detailed responses.",
+      "version": "1.0.0",
+      "size_bytes": 6500000000,
+      "size_display": "6.5 GB",
+      "filename": "solar-10.7b-instruct-q4_k_m.gguf",
+      "parameters": "10.7B",
+      "quantization": "Q4_K_M",
+      "context_length": 4096,
+      "use_case": "Instruction following, reasoning, complex tasks",
+      "tags": ["instruction", "reasoning", "complex", "solar", "performance"],
+      "license": "Apache-2.0",
+      "author": "Upstage",
+      "sha256": "6789abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345",
+      "download_urls": [
+        {
+          "name": "Primary CDN",
+          "url": "https://cdn.aibrother.app/models/solar-10.7b-instruct-q4_k_m.gguf",
+          "priority": 1,
+          "location": "GLOBAL",
+          "type": "CDN"
+        },
+        {
+          "name": "AWS S3 US",
+          "url": "https://aibrother-models.s3.us-east-1.amazonaws.com/solar-10.7b-instruct-q4_k_m.gguf",
+          "priority": 2,
+          "location": "US",
+          "type": "CDN"
+        },
+        {
+          "name": "HuggingFace Hub",
+          "url": "https://huggingface.co/upstage/SOLAR-10.7B-Instruct-v1.0-GGUF/resolve/main/solar-10.7b-instruct-v1.0.Q4_K_M.gguf",
+          "priority": 3,
+          "location": "GLOBAL",
+          "type": "DIRECT"
+        }
+      ],
+      "recommended_ram_gb": 8,
+      "performance_score": 9.3,
+      "quality_score": 9.1
+    },
+    {
+      "id": "code_llama_7b_instruct",
+      "name": "Code Llama 7B Instruct",
+      "description": "Specialized coding model based on Llama 2, fine-tuned specifically for code generation, debugging, and programming assistance across multiple languages.",
+      "version": "1.0.0",
+      "size_bytes": 3800000000,
+      "size_display": "3.8 GB",
+      "filename": "code-llama-7b-instruct-q4_k_m.gguf",
+      "parameters": "7B",
+      "quantization": "Q4_K_M",
+      "context_length": 4096,
+      "use_case": "Code generation, programming assistance, debugging",
+      "tags": ["coding", "programming", "debugging", "llama", "specialized"],
+      "license": "Custom (Llama 2)",
+      "author": "Meta",
+      "sha256": "789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456",
+      "download_urls": [
+        {
+          "name": "Primary CDN",
+          "url": "https://cdn.aibrother.app/models/code-llama-7b-instruct-q4_k_m.gguf",
+          "priority": 1,
+          "location": "GLOBAL",
+          "type": "CDN"
+        },
+        {
+          "name": "AWS S3 US",
+          "url": "https://aibrother-models.s3.us-east-1.amazonaws.com/code-llama-7b-instruct-q4_k_m.gguf",
+          "priority": 2,
+          "location": "US",
+          "type": "CDN"
+        },
+        {
+          "name": "HuggingFace Hub",
+          "url": "https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q4_K_M.gguf",
+          "priority": 3,
+          "location": "GLOBAL",
+          "type": "DIRECT"
+        }
+      ],
+      "recommended_ram_gb": 5,
+      "performance_score": 8.7,
+      "quality_score": 9.0
+    }
+  ]
+}

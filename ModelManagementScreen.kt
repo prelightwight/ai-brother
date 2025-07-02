@@ -1,5 +1,6 @@
 package com.prelightwight.aibrother.models
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,17 +31,29 @@ fun ModelManagementScreen(
     val coroutineScope = rememberCoroutineScope()
     val modelDownloader = remember { ModelDownloader(context) }
     
-    var availableModels by remember { mutableStateOf(modelDownloader.getAvailableModels()) }
-    var downloadedModels by remember { mutableStateOf(modelDownloader.getDownloadedModels()) }
+    var availableModels by remember { mutableStateOf<List<ModelInfo>>(emptyList()) }
+    var downloadedModels by remember { mutableStateOf<List<ModelInfo>>(emptyList()) }
     var downloadProgress by remember { mutableStateOf<Map<String, DownloadProgress>>(emptyMap()) }
     var selectedTab by remember { mutableStateOf(0) }
     var showDeleteDialog by remember { mutableStateOf<ModelInfo?>(null) }
-    var storageInfo by remember { mutableStateOf(modelDownloader.getModelStorageInfo()) }
+    var storageInfo by remember { mutableStateOf<Map<String, Any>>(emptyMap()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     // Refresh data
     LaunchedEffect(Unit) {
-        downloadedModels = modelDownloader.getDownloadedModels()
-        storageInfo = modelDownloader.getModelStorageInfo()
+        isLoading = true
+        errorMessage = null
+        try {
+            availableModels = modelDownloader.getAvailableModels()
+            downloadedModels = modelDownloader.getDownloadedModels()
+            storageInfo = modelDownloader.getModelStorageInfo()
+        } catch (e: Exception) {
+            errorMessage = "Failed to load model catalog: ${e.message}"
+            Log.e("ModelManagement", "Error loading models", e)
+        } finally {
+            isLoading = false
+        }
     }
 
     Column(
@@ -66,6 +79,35 @@ fun ModelManagementScreen(
             )
         }
 
+        // Error Message
+        errorMessage?.let { error ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Error,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+        }
+
         // Storage Info Card
         Card(
             modifier = Modifier
@@ -86,24 +128,42 @@ fun ModelManagementScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                val totalSpace = storageInfo["totalSpace"] as Long
-                val freeSpace = storageInfo["freeSpace"] as Long
-                val downloadedCount = storageInfo["downloadedModels"] as Int
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Downloaded Models: $downloadedCount",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Text(
-                        text = "Free Space: ${formatBytes(freeSpace)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                if (storageInfo.isNotEmpty()) {
+                    val totalSpace = storageInfo["totalSpace"] as? Long ?: 0L
+                    val freeSpace = storageInfo["freeSpace"] as? Long ?: 0L
+                    val downloadedCount = storageInfo["downloadedModels"] as? Int ?: 0
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Downloaded Models: $downloadedCount",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = "Free Space: ${formatBytes(freeSpace)}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                } else if (isLoading) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Loading storage information...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
         }
@@ -125,30 +185,63 @@ fun ModelManagementScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Content based on selected tab
-        when (selectedTab) {
-            0 -> AvailableModelsTab(
-                models = availableModels,
-                downloadProgress = downloadProgress,
-                downloadedModels = downloadedModels,
-                onDownload = { modelId ->
-                    coroutineScope.launch {
-                        modelDownloader.downloadModel(modelId).collect { progress ->
-                            downloadProgress = downloadProgress + (modelId to progress)
-                            if (progress.status == DownloadStatus.COMPLETED) {
-                                downloadedModels = modelDownloader.getDownloadedModels()
-                                storageInfo = modelDownloader.getModelStorageInfo()
+        if (isLoading && availableModels.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Loading model catalog...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else {
+            when (selectedTab) {
+                0 -> AvailableModelsTab(
+                    models = availableModels,
+                    downloadProgress = downloadProgress,
+                    downloadedModels = downloadedModels,
+                    onDownload = { modelId ->
+                        coroutineScope.launch {
+                            try {
+                                modelDownloader.downloadModel(modelId).collect { progress ->
+                                    downloadProgress = downloadProgress + (modelId to progress)
+                                    if (progress.status == DownloadStatus.COMPLETED) {
+                                        // Refresh downloaded models and storage info
+                                        downloadedModels = modelDownloader.getDownloadedModels()
+                                        storageInfo = modelDownloader.getModelStorageInfo()
+                                        
+                                        // Remove from download progress map
+                                        downloadProgress = downloadProgress - modelId
+                                    } else if (progress.status == DownloadStatus.FAILED) {
+                                        // Remove from download progress map on failure
+                                        downloadProgress = downloadProgress - modelId
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                Log.e("ModelManagement", "Download error for $modelId", e)
+                                downloadProgress = downloadProgress - modelId
                             }
                         }
                     }
-                }
-            )
-            1 -> DownloadedModelsTab(
-                models = downloadedModels,
-                onSelectModel = onModelSelected,
-                onDeleteModel = { model ->
-                    showDeleteDialog = model
-                }
-            )
+                )
+                1 -> DownloadedModelsTab(
+                    models = downloadedModels,
+                    onSelectModel = onModelSelected,
+                    onDeleteModel = { model ->
+                        showDeleteDialog = model
+                    }
+                )
+            }
         }
     }
 
@@ -164,9 +257,14 @@ fun ModelManagementScreen(
                 TextButton(
                     onClick = {
                         coroutineScope.launch {
-                            modelDownloader.deleteModel(model.id)
-                            downloadedModels = modelDownloader.getDownloadedModels()
-                            storageInfo = modelDownloader.getModelStorageInfo()
+                            try {
+                                if (modelDownloader.deleteModel(model.id)) {
+                                    downloadedModels = modelDownloader.getDownloadedModels()
+                                    storageInfo = modelDownloader.getModelStorageInfo()
+                                }
+                            } catch (e: Exception) {
+                                Log.e("ModelManagement", "Delete error for ${model.id}", e)
+                            }
                         }
                         showDeleteDialog = null
                     }
@@ -336,17 +434,78 @@ private fun ModelCard(
             
             // Download progress
             downloadProgress?.let { progress ->
-                if (progress.status == DownloadStatus.DOWNLOADING) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LinearProgressIndicator(
-                        progress = progress.percentage / 100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(
-                        text = "${progress.percentage}% • ${formatBytes(progress.bytesDownloaded)} / ${formatBytes(progress.totalBytes)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                when (progress.status) {
+                    DownloadStatus.DOWNLOADING -> {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LinearProgressIndicator(
+                            progress = progress.percentage / 100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Column {
+                            Text(
+                                text = "${progress.percentage}% • ${formatBytes(progress.bytesDownloaded)} / ${formatBytes(progress.totalBytes)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            if (progress.speed > 0) {
+                                val speedText = "${formatBytes(progress.speed)}/s"
+                                val etaText = if (progress.eta > 0) {
+                                    val minutes = progress.eta / 60
+                                    val seconds = progress.eta % 60
+                                    " • ETA: ${minutes}m ${seconds}s"
+                                } else ""
+                                Text(
+                                    text = "$speedText$etaText",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                )
+                            }
+                            if (progress.currentMirror.isNotEmpty()) {
+                                Text(
+                                    text = "Mirror: ${progress.currentMirror}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
+                    DownloadStatus.VERIFYING -> {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Verifying file integrity...",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    DownloadStatus.FAILED -> {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Error,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Download failed",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                    else -> {}
                 }
             }
         }

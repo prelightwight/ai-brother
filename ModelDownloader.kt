@@ -13,6 +13,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
+// Legacy ModelInfo for backward compatibility
 data class ModelInfo(
     val id: String,
     val name: String,
@@ -24,18 +25,38 @@ data class ModelInfo(
     val quantization: String,
     val contextLength: Int,
     val useCase: String
-)
+) {
+    companion object {
+        fun fromCatalogModel(catalogModel: CatalogModelInfo): ModelInfo {
+            return ModelInfo(
+                id = catalogModel.id,
+                name = catalogModel.name,
+                description = catalogModel.description,
+                size = catalogModel.sizeDisplay,
+                downloadUrl = catalogModel.downloadUrls.firstOrNull()?.url ?: "",
+                filename = catalogModel.filename,
+                parameters = catalogModel.parameters,
+                quantization = catalogModel.quantization,
+                contextLength = catalogModel.contextLength,
+                useCase = catalogModel.useCase
+            )
+        }
+    }
+}
 
 data class DownloadProgress(
     val modelId: String,
     val bytesDownloaded: Long,
     val totalBytes: Long,
     val percentage: Int,
-    val status: DownloadStatus
+    val status: DownloadStatus,
+    val speed: Long = 0, // bytes per second
+    val eta: Long = 0, // estimated time remaining in seconds
+    val currentMirror: String = ""
 )
 
 enum class DownloadStatus {
-    PENDING, DOWNLOADING, COMPLETED, FAILED, CANCELLED
+    PENDING, DOWNLOADING, COMPLETED, FAILED, CANCELLED, VERIFYING
 }
 
 class ModelDownloader(private val context: Context) {
@@ -43,95 +64,10 @@ class ModelDownloader(private val context: Context) {
     companion object {
         private const val TAG = "ModelDownloader"
         private const val MODELS_DIR = "models"
-        
-        // Available models with their download URLs and metadata
-        val AVAILABLE_MODELS = listOf(
-            ModelInfo(
-                id = "nous_hermes_2_mistral_7b",
-                name = "Nous Hermes 2 - Mistral 7B",
-                description = "Fine-tuned on diverse conversation data with excellent instruction following",
-                size = "4.1 GB",
-                downloadUrl = "https://huggingface.co/NousResearch/Nous-Hermes-2-Mistral-7B-DPO-GGUF/resolve/main/Nous-Hermes-2-Mistral-7B-DPO.Q4_K_M.gguf",
-                filename = "nous-hermes-2-mistral-7b-q4_k_m.gguf",
-                parameters = "7B",
-                quantization = "Q4_K_M",
-                contextLength = 8192,
-                useCase = "General conversation, instruction following"
-            ),
-            ModelInfo(
-                id = "openhermes_2_5_mistral",
-                name = "OpenHermes 2.5 Mistral",
-                description = "Enhanced version with improved reasoning and creative writing",
-                size = "4.1 GB",
-                downloadUrl = "https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B-GGUF/resolve/main/openhermes-2.5-mistral-7b.q4_k_m.gguf",
-                filename = "openhermes-2.5-mistral-7b-q4_k_m.gguf",
-                parameters = "7B",
-                quantization = "Q4_K_M",
-                contextLength = 8192,
-                useCase = "Creative writing, complex reasoning"
-            ),
-            ModelInfo(
-                id = "mythomax_l2",
-                name = "MythoMax-L2",
-                description = "Specialized for creative writing and storytelling, based on LLaMA 2",
-                size = "3.8 GB",
-                downloadUrl = "https://huggingface.co/TheBloke/MythoMax-L2-13B-GGUF/resolve/main/mythomax-l2-13b.Q4_K_M.gguf",
-                filename = "mythomax-l2-13b-q4_k_m.gguf",
-                parameters = "13B",
-                quantization = "Q4_K_M",
-                contextLength = 4096,
-                useCase = "Creative writing, storytelling, roleplay"
-            ),
-            ModelInfo(
-                id = "chronos_hermes_13b",
-                name = "Chronos-Hermes 13B",
-                description = "Balanced model for both creative and analytical tasks",
-                size = "7.3 GB",
-                downloadUrl = "https://huggingface.co/TheBloke/Chronos-Hermes-13B-GGUF/resolve/main/chronos-hermes-13b.Q4_K_M.gguf",
-                filename = "chronos-hermes-13b-q4_k_m.gguf",
-                parameters = "13B",
-                quantization = "Q4_K_M",
-                contextLength = 4096,
-                useCase = "Balanced creative and analytical tasks"
-            ),
-            ModelInfo(
-                id = "mistral_7b_dolphin_2_6",
-                name = "Mistral 7B - Dolphin 2.6",
-                description = "Uncensored model excellent for coding and technical tasks",
-                size = "4.1 GB",
-                downloadUrl = "https://huggingface.co/TheBloke/dolphin-2.6-mistral-7B-GGUF/resolve/main/dolphin-2.6-mistral-7b.Q4_K_M.gguf",
-                filename = "dolphin-2.6-mistral-7b-q4_k_m.gguf",
-                parameters = "7B",
-                quantization = "Q4_K_M",
-                contextLength = 8192,
-                useCase = "Coding, technical analysis, uncensored responses"
-            ),
-            ModelInfo(
-                id = "mistral_7b_dolphin_2_7",
-                name = "Mistral 7B - Dolphin 2.7",
-                description = "Latest Dolphin version with improved reasoning capabilities",
-                size = "4.1 GB",
-                downloadUrl = "https://huggingface.co/TheBloke/dolphin-2.7-mixtral-8x7b-GGUF/resolve/main/dolphin-2.7-mixtral-8x7b.Q4_K_M.gguf",
-                filename = "dolphin-2.7-mistral-7b-q4_k_m.gguf",
-                parameters = "7B",
-                quantization = "Q4_K_M",
-                contextLength = 8192,
-                useCase = "Advanced reasoning, coding, analysis"
-            ),
-            ModelInfo(
-                id = "phi_2",
-                name = "Phi-2 (2.7B)",
-                description = "Compact but powerful model from Microsoft, great for mobile devices",
-                size = "1.6 GB",
-                downloadUrl = "https://huggingface.co/microsoft/phi-2-GGUF/resolve/main/phi-2.q4_k_m.gguf",
-                filename = "phi-2-q4_k_m.gguf",
-                parameters = "2.7B",
-                quantization = "Q4_K_M",
-                contextLength = 2048,
-                useCase = "Mobile-optimized, general conversation, coding"
-            )
-        )
     }
+    
+    private val modelCatalog = ModelCatalog(context)
+    private var cachedCatalogModels: List<CatalogModelInfo>? = null
 
     private val modelsDir: File by lazy {
         File(context.filesDir, MODELS_DIR).apply {
@@ -148,108 +84,204 @@ class ModelDownloader(private val context: Context) {
         }
         .build()
 
-    fun getAvailableModels(): List<ModelInfo> = AVAILABLE_MODELS
+    suspend fun getAvailableModels(): List<ModelInfo> {
+        return try {
+            val catalog = modelCatalog.fetchModelCatalog()
+            cachedCatalogModels = catalog.models
+            catalog.models.map { ModelInfo.fromCatalogModel(it) }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch model catalog", e)
+            // Return empty list if catalog fails
+            emptyList()
+        }
+    }
 
-    fun getDownloadedModels(): List<ModelInfo> {
-        return AVAILABLE_MODELS.filter { model ->
+    suspend fun getDownloadedModels(): List<ModelInfo> {
+        val available = getAvailableModels()
+        return available.filter { model ->
             File(modelsDir, model.filename).exists()
         }
     }
 
     fun isModelDownloaded(modelId: String): Boolean {
-        val model = AVAILABLE_MODELS.find { it.id == modelId } ?: return false
-        return File(modelsDir, model.filename).exists()
+        val catalogModel = cachedCatalogModels?.find { it.id == modelId }
+        if (catalogModel != null) {
+            return File(modelsDir, catalogModel.filename).exists()
+        }
+        return false
     }
 
     fun getModelFile(modelId: String): File? {
-        val model = AVAILABLE_MODELS.find { it.id == modelId } ?: return null
-        val file = File(modelsDir, model.filename)
+        val catalogModel = cachedCatalogModels?.find { it.id == modelId } ?: return null
+        val file = File(modelsDir, catalogModel.filename)
         return if (file.exists()) file else null
     }
 
     fun downloadModel(modelId: String): Flow<DownloadProgress> = flow {
-        val model = AVAILABLE_MODELS.find { it.id == modelId }
+        // Get model from catalog
+        val catalogModel = cachedCatalogModels?.find { it.id == modelId }
+            ?: run {
+                // Try to refresh catalog if model not found
+                val catalog = modelCatalog.fetchModelCatalog()
+                cachedCatalogModels = catalog.models
+                catalog.models.find { it.id == modelId }
+            }
             ?: throw IllegalArgumentException("Model not found: $modelId")
 
-        val outputFile = File(modelsDir, model.filename)
-        val tempFile = File(modelsDir, "${model.filename}.tmp")
+        val outputFile = File(modelsDir, catalogModel.filename)
+        val tempFile = File(modelsDir, "${catalogModel.filename}.tmp")
+
+        // Skip download if already exists and verified
+        if (outputFile.exists()) {
+            Log.i(TAG, "Model ${catalogModel.name} already exists, verifying integrity...")
+            emit(DownloadProgress(modelId, outputFile.length(), outputFile.length(), 100, DownloadStatus.VERIFYING))
+            
+            if (modelCatalog.verifyFileIntegrity(outputFile, catalogModel.sha256)) {
+                Log.i(TAG, "Model ${catalogModel.name} already downloaded and verified")
+                emit(DownloadProgress(modelId, outputFile.length(), outputFile.length(), 100, DownloadStatus.COMPLETED))
+                return@flow
+            } else {
+                Log.w(TAG, "Model ${catalogModel.name} failed integrity check, re-downloading")
+                outputFile.delete()
+            }
+        }
 
         try {
             emit(DownloadProgress(modelId, 0, 0, 0, DownloadStatus.PENDING))
 
-            Log.i(TAG, "Starting download of ${model.name} from ${model.downloadUrl}")
-
-            val request = Request.Builder()
-                .url(model.downloadUrl)
-                .build()
-
-            val response = client.newCall(request).execute()
+            // Try mirrors in order of priority
+            val mirrors = catalogModel.downloadUrls.sortedBy { it.priority }
+            var lastException: Exception? = null
             
-            if (!response.isSuccessful) {
-                throw IOException("Failed to download: ${response.code} ${response.message}")
-            }
-
-            val totalBytes = response.body?.contentLength() ?: -1L
-            var downloadedBytes = 0L
-
-            emit(DownloadProgress(modelId, 0, totalBytes, 0, DownloadStatus.DOWNLOADING))
-
-            response.body?.let { body ->
-                body.byteStream().use { input ->
-                    tempFile.outputStream().use { output ->
-                        val buffer = ByteArray(8192)
-                        var bytesRead: Int
-                        var lastEmitTime = System.currentTimeMillis()
-
-                        while (input.read(buffer).also { bytesRead = it } != -1) {
-                            output.write(buffer, 0, bytesRead)
-                            downloadedBytes += bytesRead
-
-                            // Emit progress every 100ms or 1MB, whichever comes first
-                            val currentTime = System.currentTimeMillis()
-                            if (currentTime - lastEmitTime > 100 || downloadedBytes % (1024 * 1024) == 0L) {
-                                val percentage = if (totalBytes > 0) {
-                                    ((downloadedBytes * 100) / totalBytes).toInt()
-                                } else 0
-
-                                emit(DownloadProgress(
-                                    modelId, 
-                                    downloadedBytes, 
-                                    totalBytes, 
-                                    percentage, 
-                                    DownloadStatus.DOWNLOADING
-                                ))
-                                lastEmitTime = currentTime
-                            }
-                        }
+            for (mirror in mirrors) {
+                try {
+                    Log.i(TAG, "Attempting download of ${catalogModel.name} from ${mirror.name} (${mirror.url})")
+                    
+                    downloadFromMirror(
+                        catalogModel, 
+                        mirror, 
+                        tempFile, 
+                        outputFile,
+                        modelId
+                    ).collect { progress ->
+                        emit(progress)
                     }
+                    
+                    // If we reach here, download was successful
+                    return@flow
+                    
+                } catch (e: Exception) {
+                    Log.w(TAG, "Download failed from ${mirror.name}: ${e.message}")
+                    lastException = e
+                    tempFile.delete()
+                    
+                    // Continue to next mirror
                 }
-            } ?: throw IOException("Empty response body")
-
-            // Move temp file to final location
-            if (tempFile.renameTo(outputFile)) {
-                Log.i(TAG, "Successfully downloaded ${model.name} (${formatBytes(downloadedBytes)})")
-                emit(DownloadProgress(modelId, downloadedBytes, totalBytes, 100, DownloadStatus.COMPLETED))
-            } else {
-                throw IOException("Failed to move downloaded file")
             }
+            
+            // If all mirrors failed
+            Log.e(TAG, "All download mirrors failed for ${catalogModel.name}")
+            emit(DownloadProgress(modelId, 0, 0, 0, DownloadStatus.FAILED))
+            throw lastException ?: IOException("All download mirrors failed")
 
         } catch (e: Exception) {
-            Log.e(TAG, "Download failed for ${model.name}", e)
+            Log.e(TAG, "Download failed for ${catalogModel.name}", e)
             tempFile.delete()
             emit(DownloadProgress(modelId, 0, 0, 0, DownloadStatus.FAILED))
             throw e
         }
     }.flowOn(Dispatchers.IO)
 
+    private suspend fun downloadFromMirror(
+        catalogModel: CatalogModelInfo,
+        mirror: DownloadMirror,
+        tempFile: File,
+        outputFile: File,
+        modelId: String
+    ): Flow<DownloadProgress> = flow {
+        val request = Request.Builder()
+            .url(mirror.url)
+            .build()
+
+        val response = client.newCall(request).execute()
+        
+        if (!response.isSuccessful) {
+            throw IOException("HTTP ${response.code}: ${response.message}")
+        }
+
+        val totalBytes = response.body?.contentLength() ?: catalogModel.sizeBytes
+        var downloadedBytes = 0L
+        var startTime = System.currentTimeMillis()
+        var lastEmitTime = startTime
+
+        emit(DownloadProgress(modelId, 0, totalBytes, 0, DownloadStatus.DOWNLOADING, currentMirror = mirror.name))
+
+        response.body?.let { body ->
+            body.byteStream().use { input ->
+                tempFile.outputStream().use { output ->
+                    val buffer = ByteArray(16384) // Larger buffer for better performance
+                    var bytesRead: Int
+
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        output.write(buffer, 0, bytesRead)
+                        downloadedBytes += bytesRead
+
+                        val currentTime = System.currentTimeMillis()
+                        
+                        // Emit progress every 500ms or 5MB, whichever comes first
+                        if (currentTime - lastEmitTime > 500 || downloadedBytes % (5 * 1024 * 1024) == 0L) {
+                            val percentage = if (totalBytes > 0) {
+                                ((downloadedBytes * 100) / totalBytes).toInt()
+                            } else 0
+
+                            // Calculate speed and ETA
+                            val elapsedSeconds = (currentTime - startTime) / 1000.0
+                            val speed = if (elapsedSeconds > 0) (downloadedBytes / elapsedSeconds).toLong() else 0L
+                            val eta = if (speed > 0 && totalBytes > downloadedBytes) {
+                                ((totalBytes - downloadedBytes) / speed)
+                            } else 0L
+
+                            emit(DownloadProgress(
+                                modelId, 
+                                downloadedBytes, 
+                                totalBytes, 
+                                percentage, 
+                                DownloadStatus.DOWNLOADING,
+                                speed = speed,
+                                eta = eta,
+                                currentMirror = mirror.name
+                            ))
+                            lastEmitTime = currentTime
+                        }
+                    }
+                }
+            }
+        } ?: throw IOException("Empty response body from ${mirror.name}")
+
+        // Verify integrity before final move
+        emit(DownloadProgress(modelId, downloadedBytes, totalBytes, 100, DownloadStatus.VERIFYING, currentMirror = mirror.name))
+        
+        if (!modelCatalog.verifyFileIntegrity(tempFile, catalogModel.sha256)) {
+            throw IOException("Downloaded file failed integrity verification")
+        }
+
+        // Move temp file to final location
+        if (tempFile.renameTo(outputFile)) {
+            Log.i(TAG, "Successfully downloaded and verified ${catalogModel.name} from ${mirror.name} (${formatBytes(downloadedBytes)})")
+            emit(DownloadProgress(modelId, downloadedBytes, totalBytes, 100, DownloadStatus.COMPLETED, currentMirror = mirror.name))
+        } else {
+            throw IOException("Failed to move downloaded file")
+        }
+    }
+
     suspend fun deleteModel(modelId: String): Boolean = withContext(Dispatchers.IO) {
-        val model = AVAILABLE_MODELS.find { it.id == modelId } ?: return@withContext false
-        val file = File(modelsDir, model.filename)
+        val catalogModel = cachedCatalogModels?.find { it.id == modelId } ?: return@withContext false
+        val file = File(modelsDir, catalogModel.filename)
         
         return@withContext if (file.exists()) {
             val deleted = file.delete()
             if (deleted) {
-                Log.i(TAG, "Deleted model: ${model.name}")
+                Log.i(TAG, "Deleted model: ${catalogModel.name}")
             }
             deleted
         } else {
@@ -257,7 +289,7 @@ class ModelDownloader(private val context: Context) {
         }
     }
 
-    fun getModelStorageInfo(): Map<String, Any> {
+    suspend fun getModelStorageInfo(): Map<String, Any> {
         val totalSpace = modelsDir.totalSpace
         val freeSpace = modelsDir.freeSpace
         val usedSpace = totalSpace - freeSpace
