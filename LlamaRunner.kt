@@ -229,7 +229,7 @@ object LlamaRunner {
         }
     }
 
-    // Streaming inference support with token-by-token emission
+    // Enhanced streaming inference with real token-by-token emission
     suspend fun inferStream(prompt: String, config: InferenceConfig = InferenceConfig()): Flow<String> = flow {
         val context = appContext ?: return@flow
         val uri = modelUri ?: return@flow
