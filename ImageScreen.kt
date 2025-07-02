@@ -569,53 +569,111 @@ data class ImageAnalysisResult(
 )
 
 private fun analyzeImage(bitmap: Bitmap?): ImageAnalysisResult {
-    // This is a mock implementation
-    // In a real app, you would use ML Kit, TensorFlow Lite, or other AI services
+    // Enhanced mock implementation with realistic computer vision analysis
+    // In production, use ML Kit, TensorFlow Lite, or cloud vision APIs
     
     if (bitmap == null) {
         return ImageAnalysisResult(
-            description = "Unable to analyze image",
+            description = "Unable to analyze: Image could not be loaded",
             confidence = 0.0f,
-            tags = emptyList()
+            tags = listOf("error")
         )
     }
     
-    // Mock analysis based on image characteristics
+    // Analyze image properties for realistic mock analysis
     val width = bitmap.width
     val height = bitmap.height
-    val isLandscape = width > height
-    val isSquare = (width - height).let { kotlin.math.abs(it) < 50 }
+    val aspectRatio = width.toFloat() / height.toFloat()
+    val isLandscape = aspectRatio > 1.3f
+    val isPortrait = aspectRatio < 0.75f
+    val isSquare = aspectRatio in 0.75f..1.3f
     
-    // Generate mock analysis
-    val analysisOptions = listOf(
-        ImageAnalysisResult(
-            description = "A digital photograph showing objects and scenery with natural lighting and composition.",
-            confidence = 0.87f,
-            tags = listOf("photo", "digital", "natural", "composition")
-        ),
-        ImageAnalysisResult(
-            description = "An image containing various visual elements with good contrast and color balance.",
-            confidence = 0.82f,
-            tags = listOf("visual", "colorful", "balanced", "contrast")
-        ),
-        ImageAnalysisResult(
-            description = "A captured moment featuring interesting subjects with clear visual details.",
-            confidence = 0.78f,
-            tags = listOf("moment", "clear", "detailed", "subjects")
-        ),
-        ImageAnalysisResult(
-            description = "A well-composed image with good lighting and visual appeal.",
-            confidence = 0.91f,
-            tags = listOf("composed", "lighting", "appealing", "quality")
+    // Sample pixel analysis for color characteristics
+    val centerPixel = bitmap.getPixel(width / 2, height / 2)
+    val red = (centerPixel shr 16) and 0xFF
+    val green = (centerPixel shr 8) and 0xFF
+    val blue = centerPixel and 0xFF
+    val brightness = (red + green + blue) / 3
+    
+    val isDark = brightness < 80
+    val isBright = brightness > 180
+    val isColorful = kotlin.math.max(kotlin.math.max(red, green), blue) - 
+                    kotlin.math.min(kotlin.math.min(red, green), blue) > 100
+    
+    // Determine dominant color characteristics
+    val dominantColor = when {
+        red > green + 30 && red > blue + 30 -> "reddish"
+        green > red + 30 && green > blue + 30 -> "greenish"
+        blue > red + 30 && blue > green + 30 -> "bluish"
+        red + green > blue + 60 -> "warm"
+        blue + green > red + 60 -> "cool"
+        else -> "neutral"
+    }
+    
+    // Generate realistic descriptions based on analysis
+    val sceneTypes = when {
+        isLandscape && isBright -> listOf(
+            "outdoor landscape", "scenic view", "nature scene", "outdoor photography"
         )
+        isPortrait && isDark -> listOf(
+            "portrait photography", "indoor scene", "artistic composition", "dramatic lighting"
+        )
+        isSquare && isColorful -> listOf(
+            "social media image", "artistic composition", "creative photography", "lifestyle image"
+        )
+        else -> listOf(
+            "general photography", "digital image", "captured moment", "photographic content"
+        )
+    }
+    
+    val sceneType = sceneTypes.random()
+    val lightingDesc = when {
+        isBright -> "well-lit"
+        isDark -> "low-light"
+        else -> "balanced lighting"
+    }
+    
+    val colorDesc = when {
+        isColorful && dominantColor != "neutral" -> "vibrant $dominantColor tones"
+        isColorful -> "rich and vibrant colors"
+        dominantColor != "neutral" -> "$dominantColor color palette"
+        else -> "natural color balance"
+    }
+    
+    val description = "This appears to be ${sceneType.lowercase()} with $lightingDesc and $colorDesc. " +
+            "The image shows good composition and clarity at ${width}x${height} resolution."
+    
+    // Generate relevant tags
+    val tags = mutableListOf<String>().apply {
+        add("photograph")
+        add("digital")
+        add(if (isLandscape) "landscape" else if (isPortrait) "portrait" else "square")
+        add(if (isDark) "dark" else if (isBright) "bright" else "balanced")
+        add(dominantColor)
+        if (isColorful) add("colorful")
+        add("${width}x${height}")
+        if (width > 1920 || height > 1920) add("high-resolution")
+        if (aspectRatio > 2.0f || aspectRatio < 0.5f) add("wide-format")
+        when (sceneType) {
+            "outdoor landscape" -> addAll(listOf("outdoor", "nature", "landscape"))
+            "portrait photography" -> addAll(listOf("portrait", "people", "closeup"))
+            "social media image" -> addAll(listOf("social", "lifestyle", "square"))
+            else -> addAll(listOf("general", "scene"))
+        }
+        add("analyzed")
+    }
+    
+    // Simulate realistic confidence based on image quality
+    val confidence = when {
+        width < 300 || height < 300 -> 0.60f + (Math.random() * 0.15f).toFloat()
+        brightness in 50..200 && isColorful -> 0.85f + (Math.random() * 0.1f).toFloat()
+        isDark || isBright -> 0.70f + (Math.random() * 0.15f).toFloat()
+        else -> 0.75f + (Math.random() * 0.15f).toFloat()
+    }
+    
+    return ImageAnalysisResult(
+        description = description,
+        confidence = confidence.coerceIn(0.0f, 1.0f),
+        tags = tags.distinct().take(8) // Limit to most relevant tags
     )
-    
-    // Add format-specific tags
-    val formatTags = mutableListOf<String>()
-    if (isLandscape) formatTags.add("landscape")
-    if (isSquare) formatTags.add("square")
-    formatTags.add("${width}x${height}")
-    
-    val result = analysisOptions.random()
-    return result.copy(tags = result.tags + formatTags)
 }

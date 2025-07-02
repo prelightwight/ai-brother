@@ -41,7 +41,9 @@ data class ChatMessage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen() {
+fun ChatScreen(
+    selectedModelId: String? = null
+) {
     var messages by remember { mutableStateOf(listOf<ChatMessage>()) }
     var currentInput by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -59,6 +61,24 @@ fun ChatScreen() {
     // Initialize LlamaRunner
     LaunchedEffect(context) {
         LlamaRunner.init(context)
+    }
+
+    // Load model if selectedModelId is provided
+    LaunchedEffect(selectedModelId) {
+        if (selectedModelId != null) {
+            modelStatus = "Loading model: $selectedModelId..."
+            try {
+                val result = LlamaRunner.loadModelById(selectedModelId)
+                modelStatus = if (result.startsWith("Error:")) {
+                    result
+                } else {
+                    "✅ $result"
+                }
+                performanceStats = LlamaRunner.getPerformanceStats()
+            } catch (e: Exception) {
+                modelStatus = "Error loading model: ${e.message}"
+            }
+        }
     }
 
     // Monitor performance stats

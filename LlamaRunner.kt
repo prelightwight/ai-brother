@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import com.prelightwight.aibrother.models.ModelDownloader
 
 data class ModelInfo(
     val name: String,
@@ -41,9 +42,13 @@ object LlamaRunner {
     // Performance monitoring
     private var lastInferenceTime = 0L
     private var averageTokensPerSecond = 0f
+    
+    // Model downloader
+    private var modelDownloader: ModelDownloader? = null
 
     fun init(context: Context) {
         appContext = context.applicationContext
+        modelDownloader = ModelDownloader(context)
         Log.i(TAG, "LlamaRunner initialized")
     }
 
@@ -61,6 +66,41 @@ object LlamaRunner {
         
         modelUri = uri
         Log.i(TAG, "Model URI set: $uri")
+    }
+
+    suspend fun loadModelById(modelId: String): String = withContext(Dispatchers.IO) {
+        val downloader = modelDownloader ?: return@withContext "Error: Model downloader not initialized"
+        
+        try {
+            val modelFile = downloader.getModelFile(modelId)
+                ?: return@withContext "Error: Model not found or not downloaded: $modelId"
+            
+            // Unload current model if switching
+            if (currentModelPath != null && LlamaInterface.isModelLoaded()) {
+                Log.i(TAG, "Unloading previous model")
+                LlamaInterface.unloadModel()
+                currentModelPath = null
+            }
+            
+            Log.i(TAG, "Loading model by ID: $modelId from ${modelFile.absolutePath}")
+            
+            val success = LlamaInterface.loadModel(modelFile.absolutePath)
+            if (success) {
+                currentModelPath = modelFile.absolutePath
+                Log.i(TAG, "Model loaded successfully: $modelId")
+                
+                val info = LlamaInterface.getModelInfo()
+                Log.i(TAG, "Model info: $info")
+                
+                "Model loaded successfully: $modelId"
+            } else {
+                Log.e(TAG, "Failed to load model via native interface")
+                "Error: Failed to load model. Check if the file is a valid GGUF model."
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception during model loading by ID", e)
+            "Error: ${e.message}"
+        }
     }
 
     suspend fun loadModel(): String = withContext(Dispatchers.IO) {
@@ -189,7 +229,7 @@ object LlamaRunner {
         }
     }
 
-    // Streaming inference support with token-by-token emission
+    // Enhanced streaming inference with real token-by-token emission
     suspend fun inferStream(prompt: String, config: InferenceConfig = InferenceConfig()): Flow<String> = flow {
         val context = appContext ?: return@flow
         val uri = modelUri ?: return@flow

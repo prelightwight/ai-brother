@@ -546,17 +546,123 @@ private fun extractTextContent(context: Context, uri: Uri, mimeType: String?): S
                         reader.readText()
                     }
                 }
+                mimeType == "application/pdf" -> {
+                    // For PDF files - placeholder for real PDF extraction
+                    val fileName = getFileNameFromUri(context, uri) ?: "document.pdf"
+                    """
+                    PDF Document: $fileName
+                    
+                    📄 This is extracted content from a PDF file.
+                    
+                    In a production implementation, this would use libraries like:
+                    • PdfBox for Android
+                    • iText PDF library
+                    • Android PDF Renderer API
+                    
+                    The content would include:
+                    - All text from the PDF pages
+                    - Formatted paragraphs and sections
+                    - Tables and structured data
+                    - Metadata like author, title, creation date
+                    
+                    Example content:
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod 
+                    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim 
+                    veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea 
+                    commodo consequat.
+                    
+                    This placeholder demonstrates how extracted PDF content would appear 
+                    in the knowledge base, ready for AI-powered search and analysis.
+                    """.trimIndent()
+                }
+                mimeType?.contains("word") == true || 
+                mimeType?.contains("document") == true ||
+                mimeType?.contains("officedocument") == true -> {
+                    // For Word documents - placeholder for real Word extraction
+                    val fileName = getFileNameFromUri(context, uri) ?: "document.docx"
+                    """
+                    Word Document: $fileName
+                    
+                    📝 This is extracted content from a Word document.
+                    
+                    Production implementation would use:
+                    • Apache POI for Android
+                    • docx4j library
+                    • Microsoft Graph API
+                    
+                    Extracted content would include:
+                    - Document text with formatting preserved
+                    - Headers and footers
+                    - Table contents
+                    - Comments and tracked changes
+                    - Document properties and metadata
+                    
+                    Sample extracted text:
+                    
+                    CHAPTER 1: INTRODUCTION
+                    
+                    This document outlines the key concepts and methodologies used in 
+                    modern AI development. The following sections cover:
+                    
+                    1. Machine Learning Fundamentals
+                    2. Natural Language Processing
+                    3. Computer Vision Applications
+                    4. Ethical Considerations
+                    
+                    Each section provides detailed explanations, code examples, and 
+                    practical applications that can be implemented in real-world scenarios.
+                    """.trimIndent()
+                }
+                mimeType?.startsWith("application/") == true -> {
+                    // Try to read as text with better error handling
+                    try {
+                        val text = BufferedReader(InputStreamReader(stream, Charsets.UTF_8)).use { reader ->
+                            val content = reader.readText()
+                            if (content.length > 50000) {
+                                content.take(50000) + "\n\n[Content truncated - file too large]"
+                            } else content
+                        }
+                        
+                        if (text.isBlank()) {
+                            "File appears to be empty or contains no readable text."
+                        } else {
+                            // Clean up the text
+                            text.replace(Regex("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]"), "")
+                                .replace(Regex("\\s+"), " ")
+                                .trim()
+                        }
+                    } catch (e: Exception) {
+                        "Unable to extract readable text from this file type: $mimeType\nError: ${e.message}"
+                    }
+                }
                 else -> {
-                    // For other file types, try to read as text
-                    // In a full implementation, you'd use libraries like Apache Tika
-                    BufferedReader(InputStreamReader(stream)).use { reader ->
-                        reader.readText()
+                    // Try reading as plain text
+                    try {
+                        BufferedReader(InputStreamReader(stream, Charsets.UTF_8)).use { reader ->
+                            reader.readText().take(10000)
+                        }
+                    } catch (e: Exception) {
+                        "Unsupported file type for text extraction: $mimeType"
                     }
                 }
             }
-        } ?: ""
+        } ?: "Error: Could not open file for reading"
     } catch (e: Exception) {
-        ""
+        "Error extracting text: ${e.message}"
+    }
+}
+
+private fun getFileNameFromUri(context: Context, uri: Uri): String? {
+    return try {
+        val cursor = context.contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val nameIndex = it.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (nameIndex != -1) it.getString(nameIndex) else null
+            } else null
+        }
+    } catch (e: Exception) {
+        null
     }
 }
 
