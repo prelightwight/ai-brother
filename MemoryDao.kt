@@ -18,7 +18,7 @@ interface MemoryDao {
     @Query("DELETE FROM memories WHERE type = 'memory'")
     suspend fun deleteAllMemories()
     
-    @Query("SELECT * FROM memories WHERE content LIKE '%' || :query || '%' AND type = 'memory'")
+    @Query("SELECT * FROM memories WHERE (content LIKE '%' || :query || '%' OR title LIKE '%' || :query || '%' OR tags LIKE '%' || :query || '%') AND type = 'memory' ORDER BY timestamp DESC")
     suspend fun searchMemories(query: String): List<MemoryEntity>
 }
 
@@ -52,6 +52,6 @@ interface ConversationDao {
     @Query("SELECT COUNT(*) FROM conversations")
     suspend fun getConversationCount(): Int
     
-    @Query("SELECT * FROM conversations WHERE content LIKE '%' || :query || '%'")
+    @Query("SELECT * FROM conversations WHERE content LIKE '%' || :query || '%' OR role LIKE '%' || :query || '%' ORDER BY timestamp DESC")
     suspend fun searchConversations(query: String): List<ConversationEntity>
 }
