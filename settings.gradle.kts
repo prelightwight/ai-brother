@@ -14,4 +14,3 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AIBrother"
-include(":app")
