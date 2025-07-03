@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AIBrother"
+rootProject.name = "ai-brother"
