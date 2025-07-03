@@ -26,6 +26,16 @@ android {
         }
     }
 
+    // Configure source sets for the non-standard directory structure
+    sourceSets {
+        getByName("main") {
+            java.srcDirs(".")
+            kotlin.srcDirs(".")
+            res.srcDirs("res")
+            manifest.srcFile("AndroidManifest.xml")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -59,11 +69,14 @@ android {
         }
     }
     
-    // External native build configuration for future llama.cpp integration
-    externalNativeBuild {
-        cmake {
-            path = file("CMakeLists.txt")
-            version = "3.22.1"
+    // External native build configuration for llama.cpp integration
+    // Made conditional to allow Android Studio sync without NDK
+    if (System.getenv("ENABLE_NATIVE_BUILD") == "true") {
+        externalNativeBuild {
+            cmake {
+                path = file("CMakeLists.txt")
+                version = "3.22.1"
+            }
         }
     }
 }
