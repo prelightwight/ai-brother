@@ -35,6 +35,10 @@ The issue was **NOT** a plugin resolution problem as initially assumed, but rath
   }
   ```
 
+**Modified `settings.gradle.kts`:**
+- Fixed project name consistency: `rootProject.name = "ai-brother"` (was "AIBrother")
+- Now matches directory name for better Android Studio integration
+
 ### 3. Android Resource Structure
 **Created proper resource directories:**
 - `res/values/strings.xml` - App name and string resources
