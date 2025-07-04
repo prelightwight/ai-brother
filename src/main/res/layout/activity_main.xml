@@ -5,20 +5,20 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- App Header -->
-    <LinearLayout
+    <!-- App Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="?attr/colorPrimary"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="16dp"
+        app:menu="@menu/toolbar_menu">
 
         <TextView
             android:id="@+id/header_title"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_gravity="start|center_vertical"
             android:text="AI Brother"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -28,12 +28,13 @@
             android:id="@+id/status_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
             android:text="Ready"
             android:textSize="12sp"
             android:textColor="?attr/colorOnPrimary"
             android:alpha="0.8" />
 
-    </LinearLayout>
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <!-- Fragment Container -->
     <androidx.fragment.app.FragmentContainerView

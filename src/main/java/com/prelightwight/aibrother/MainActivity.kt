@@ -6,11 +6,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.appbar.MaterialToolbar
+import androidx.navigation.NavController
 
 class MainActivity : AppCompatActivity() {
     
     private lateinit var statusText: TextView
     private lateinit var bottomNavigation: BottomNavigationView
+    private lateinit var toolbar: MaterialToolbar
+    private lateinit var navController: NavController
     private lateinit var tutorialManager: TutorialManager
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         ThemeManager.applySystemBarsTheme(this)
         
         initializeViews()
+        setSupportActionBar(toolbar)
         setupNavigation()
         applyThemeToViews()
         
@@ -39,12 +44,13 @@ class MainActivity : AppCompatActivity() {
     private fun initializeViews() {
         statusText = findViewById(R.id.status_text)
         bottomNavigation = findViewById(R.id.bottom_navigation)
+        toolbar = findViewById(R.id.toolbar)
     }
     
     private fun setupNavigation() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
+        navController = navHostFragment.navController
         
         bottomNavigation.setupWithNavController(navController)
         
@@ -75,5 +81,18 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         // Reapply theme in case settings changed
         applyThemeToViews()
+    }
+    
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.nav_models -> {
+                // Navigate to the Models destination when selected from overflow menu
+                if (::navController.isInitialized) {
+                    navController.navigate(R.id.nav_models)
+                }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }
