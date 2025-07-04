@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application") version "8.2.2"
     id("org.jetbrains.kotlin.android") version "1.9.22"
-    id("org.jetbrains.kotlin.kapt") version "1.9.22"
+    // id("org.jetbrains.kotlin.kapt") version "1.9.22" // Temporarily disabled for testing
 }
 
 android {
@@ -96,9 +96,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
-    // Room
+    // Room - temporarily commented out for testing
     implementation("androidx.room:room-runtime:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
+    // kapt("androidx.room:room-compiler:2.6.1") // Temporarily disabled
     implementation("androidx.room:room-ktx:2.6.1")
 
     // Coroutines

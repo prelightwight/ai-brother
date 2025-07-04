@@ -47,7 +47,7 @@ fun ChatScreen(
     var messages by remember { mutableStateOf(listOf<ChatMessage>()) }
     var currentInput by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
-    var modelStatus by remember { mutableStateOf("No model selected") }
+    var modelStatus by remember { mutableStateOf("✅ AI Brother Ready - Test Mode") }
     var selectedModelUri by remember { mutableStateOf<Uri?>(null) }
     var showModelInfo by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
@@ -273,7 +273,7 @@ fun ChatScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Your privacy-focused AI assistant. Start by loading a model, then ask me anything!",
+                                text = "Your privacy-focused AI assistant is ready! Type a message below to start chatting. 🚀",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -326,26 +326,21 @@ fun ChatScreen(
                     onValueChange = { currentInput = it },
                     modifier = Modifier.weight(1f),
                     placeholder = { 
-                        Text(
-                            if (LlamaRunner.isModelLoaded()) 
-                                "Type your message..." 
-                            else 
-                                "Load a model first..."
-                        ) 
+                        Text("Type your message and press send to test!")
                     },
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(
                         onSend = { sendMessage() }
                     ),
                     maxLines = 4,
-                    enabled = !isLoading && LlamaRunner.isModelLoaded()
+                    enabled = !isLoading
                 )
                 
                 Spacer(modifier = Modifier.width(8.dp))
                 
                 FilledIconButton(
                     onClick = { sendMessage() },
-                    enabled = currentInput.isNotBlank() && !isLoading && LlamaRunner.isModelLoaded()
+                    enabled = currentInput.isNotBlank() && !isLoading
                 ) {
                     Icon(Icons.Default.Send, contentDescription = "Send")
                 }

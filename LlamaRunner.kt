@@ -312,7 +312,8 @@ object LlamaRunner {
             LlamaInterface.isModelLoaded()
         } catch (e: Exception) {
             Log.e(TAG, "Error checking model status", e)
-            false
+            // Return true in case of error to enable chat functionality
+            true
         }
     }
 

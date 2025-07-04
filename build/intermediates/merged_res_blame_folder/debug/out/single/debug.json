@@ -1,5 +1,9 @@
 [
     {
+        "merged": "com.prelightwight.aibrother-merged_res-59:/xml_file_paths.xml.flat",
+        "source": "com.prelightwight.aibrother-workspace-60:/xml/file_paths.xml"
+    },
+    {
         "merged": "com.prelightwight.aibrother-merged_res-59:/mipmap-xxxhdpi_ic_launcher.xml.flat",
         "source": "com.prelightwight.aibrother-workspace-60:/mipmap-xxxhdpi/ic_launcher.xml"
     },
@@ -14,10 +18,6 @@
     {
         "merged": "com.prelightwight.aibrother-merged_res-59:/mipmap-xhdpi_ic_launcher.xml.flat",
         "source": "com.prelightwight.aibrother-workspace-60:/mipmap-xhdpi/ic_launcher.xml"
-    },
-    {
-        "merged": "/home/ubuntu/.gradle/daemon/8.2.1/com.prelightwight.aibrother-merged_res-59:/xml_file_paths.xml.flat",
-        "source": "/home/ubuntu/.gradle/daemon/8.2.1/com.prelightwight.aibrother-workspace-60:/xml/file_paths.xml"
     },
     {
         "merged": "com.prelightwight.aibrother-merged_res-59:/mipmap-hdpi_ic_launcher.xml.flat",
