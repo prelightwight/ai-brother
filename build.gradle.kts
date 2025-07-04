@@ -11,8 +11,8 @@ android {
         applicationId = "com.prelightwight.aibrother"
         minSdk = 21
         targetSdk = 28
-        versionCode = 3  // Test version
-        versionName = "1.2-test"
+        versionCode = 4  // Updated version
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
@@ -20,6 +20,14 @@ android {
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
+        
+        // Temporarily disable native build until NDK is properly configured
+        // externalNativeBuild {
+        //     cmake {
+        //         cppFlags += listOf("-std=c++17", "-frtti", "-fexceptions")
+        //         abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        //     }
+        // }
     }
 
     buildTypes {
@@ -49,6 +57,14 @@ android {
     buildFeatures {
         viewBinding = true  // Use view binding instead of Compose
     }
+
+    // Temporarily disable native build configuration
+    // externalNativeBuild {
+    //     cmake {
+    //         path = file("CMakeLists.txt")
+    //         version = "3.22.1"
+    //     }
+    // }
 
     packaging {
         resources {

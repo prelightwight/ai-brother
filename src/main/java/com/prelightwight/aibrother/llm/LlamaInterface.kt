@@ -11,12 +11,16 @@ class LlamaInterface {
     companion object {
         private const val TAG = "LlamaInterface"
         
+        private var nativeLibraryLoaded = false
+        
         init {
             try {
                 System.loadLibrary("aibrother")
+                nativeLibraryLoaded = true
                 Log.i(TAG, "Native library loaded successfully")
             } catch (e: UnsatisfiedLinkError) {
-                Log.e(TAG, "Failed to load native library", e)
+                Log.w(TAG, "Native library not available, using mock implementation")
+                nativeLibraryLoaded = false
             }
         }
         
@@ -30,7 +34,7 @@ class LlamaInterface {
         }
     }
     
-    // Native methods
+    // Native methods - only used if library is loaded
     external fun stringFromJNI(): String
     external fun initializeBackendNative(): Boolean
     external fun loadModelNative(modelPath: String): Boolean
@@ -40,60 +44,88 @@ class LlamaInterface {
     external fun freeModelNative()
     external fun shutdownBackendNative()
     
-    private var isInitialized = false
+    // Mock state for when native library is not available
+    private var mockInitialized = false
+    private var mockModelLoaded = false
+    private var mockModelPath = ""
+    private val mockResponses = listOf(
+        "I'm running in simulation mode while we set up the native AI library.",
+        "This is a mock response - the real AI model will provide much better answers once loaded!",
+        "Mock AI response: I understand your question and would provide a detailed answer with a real model.",
+        "Simulated response: The AI system is working, but using fallback responses until native integration is complete."
+    )
     
     suspend fun initialize(): Boolean = withContext(Dispatchers.IO) {
         try {
-            Log.i(TAG, "Initializing AI backend...")
-            val result = initializeBackendNative()
-            if (result) {
-                isInitialized = true
-                Log.i(TAG, "Backend initialized successfully")
+            if (nativeLibraryLoaded) {
+                Log.i(TAG, "Initializing native AI backend...")
+                val result = initializeBackendNative()
+                if (result) {
+                    Log.i(TAG, "Native backend initialized successfully")
+                }
+                result
+            } else {
+                Log.i(TAG, "Initializing mock AI backend...")
+                mockInitialized = true
+                true
             }
-            result
         } catch (e: Exception) {
             Log.e(TAG, "Exception during initialization", e)
-            false
+            mockInitialized = true
+            true // Return true to continue with mock mode
         }
     }
     
     suspend fun loadModel(modelPath: String): Boolean = withContext(Dispatchers.IO) {
         try {
-            if (!isInitialized) {
-                initialize()
-            }
-            
             val file = File(modelPath)
             if (!file.exists()) {
                 Log.e(TAG, "Model file does not exist: $modelPath")
                 return@withContext false
             }
             
-            Log.i(TAG, "Loading model: $modelPath")
-            val result = loadModelNative(modelPath)
-            if (result) {
-                Log.i(TAG, "Model loaded successfully")
+            if (nativeLibraryLoaded && mockInitialized) {
+                Log.i(TAG, "Loading model with native library: $modelPath")
+                val result = loadModelNative(modelPath)
+                if (result) {
+                    Log.i(TAG, "Model loaded successfully")
+                }
+                result
+            } else {
+                Log.i(TAG, "Loading model in mock mode: $modelPath")
+                mockModelPath = modelPath
+                mockModelLoaded = true
+                true
             }
-            result
         } catch (e: Exception) {
-            Log.e(TAG, "Exception during model loading", e)
-            false
+            Log.e(TAG, "Exception during model loading, falling back to mock", e)
+            mockModelPath = modelPath
+            mockModelLoaded = true
+            true
         }
     }
     
     fun isModelLoaded(): Boolean {
         return try {
-            isModelLoadedNative()
+            if (nativeLibraryLoaded) {
+                isModelLoadedNative()
+            } else {
+                mockModelLoaded
+            }
         } catch (e: Exception) {
-            false
+            mockModelLoaded
         }
     }
     
     fun getLoadedModelPath(): String {
         return try {
-            getLoadedModelPathNative()
+            if (nativeLibraryLoaded) {
+                getLoadedModelPathNative()
+            } else {
+                mockModelPath
+            }
         } catch (e: Exception) {
-            ""
+            mockModelPath
         }
     }
     
@@ -103,13 +135,27 @@ class LlamaInterface {
                 return@withContext "Please load a model first from the Models tab!"
             }
             
-            val prompt = if (systemPrompt.isNotBlank()) {
-                "System: $systemPrompt\n\nUser: $userMessage\nAssistant: "
+            if (nativeLibraryLoaded) {
+                val prompt = if (systemPrompt.isNotBlank()) {
+                    "System: $systemPrompt\n\nUser: $userMessage\nAssistant: "
+                } else {
+                    "User: $userMessage\nAssistant: "
+                }
+                generateResponseNative(prompt)
             } else {
-                "User: $userMessage\nAssistant: "
+                // Mock response based on loaded model
+                val modelName = when {
+                    mockModelPath.contains("tinyllama", ignoreCase = true) -> "TinyLlama"
+                    mockModelPath.contains("phi", ignoreCase = true) -> "Phi-3"
+                    mockModelPath.contains("gemma", ignoreCase = true) -> "Gemma 2"
+                    mockModelPath.contains("llama", ignoreCase = true) -> "Llama 3.2"
+                    mockModelPath.contains("qwen", ignoreCase = true) -> "Qwen2"
+                    else -> "AI Model"
+                }
+                
+                val baseResponse = mockResponses.random()
+                "$baseResponse\n\n(Currently using $modelName in simulation mode - real AI responses coming soon!)"
             }
-            
-            generateResponseNative(prompt)
         } catch (e: Exception) {
             "Error generating response: ${e.message}"
         }
@@ -117,17 +163,28 @@ class LlamaInterface {
     
     suspend fun freeModel() = withContext(Dispatchers.IO) {
         try {
-            freeModelNative()
+            if (nativeLibraryLoaded) {
+                freeModelNative()
+            } else {
+                mockModelLoaded = false
+                mockModelPath = ""
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error freeing model", e)
+            mockModelLoaded = false
+            mockModelPath = ""
         }
     }
     
     fun testConnection(): String {
         return try {
-            stringFromJNI()
+            if (nativeLibraryLoaded) {
+                stringFromJNI()
+            } else {
+                "AI Brother Mock Library v1.1.0 - Native library will be enabled soon!"
+            }
         } catch (e: Exception) {
-            "Connection failed: ${e.message}"
+            "Mock connection active: ${e.message}"
         }
     }
 }
