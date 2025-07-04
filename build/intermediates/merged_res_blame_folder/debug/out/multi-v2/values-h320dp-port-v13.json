@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.prelightwight.aibrother-mergeDebugResources-26:/values-h320dp-port-v13/values-h320dp-port-v13.xml",
+            "map": [
+                {
+                    "source": "/home/ubuntu/.gradle/caches/transforms-3/a28eeedd838e286c3fe1cdf2bb55aabf/transformed/material-1.9.0/res/values-h320dp-port-v13/values-h320dp-port-v13.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "75",
+                        "endOffsets": "126"
+                    }
+                }
+            ]
+        }
+    ]
+}
