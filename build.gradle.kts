@@ -75,6 +75,11 @@ dependencies {
     
     // RecyclerView for chat interface
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    
+    // Navigation and Fragments
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.0")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

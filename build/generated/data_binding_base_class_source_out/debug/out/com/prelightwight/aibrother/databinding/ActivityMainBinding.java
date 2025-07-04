@@ -4,15 +4,14 @@ package com.prelightwight.aibrother.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.FragmentContainerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.prelightwight.aibrother.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -23,24 +22,20 @@ public final class ActivityMainBinding implements ViewBinding {
   private final LinearLayout rootView;
 
   @NonNull
-  public final EditText messageInput;
+  public final BottomNavigationView bottomNavigation;
 
   @NonNull
-  public final RecyclerView messagesRecycler;
-
-  @NonNull
-  public final Button sendButton;
+  public final FragmentContainerView navHostFragment;
 
   @NonNull
   public final TextView statusText;
 
-  private ActivityMainBinding(@NonNull LinearLayout rootView, @NonNull EditText messageInput,
-      @NonNull RecyclerView messagesRecycler, @NonNull Button sendButton,
-      @NonNull TextView statusText) {
+  private ActivityMainBinding(@NonNull LinearLayout rootView,
+      @NonNull BottomNavigationView bottomNavigation,
+      @NonNull FragmentContainerView navHostFragment, @NonNull TextView statusText) {
     this.rootView = rootView;
-    this.messageInput = messageInput;
-    this.messagesRecycler = messagesRecycler;
-    this.sendButton = sendButton;
+    this.bottomNavigation = bottomNavigation;
+    this.navHostFragment = navHostFragment;
     this.statusText = statusText;
   }
 
@@ -71,21 +66,15 @@ public final class ActivityMainBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.message_input;
-      EditText messageInput = ViewBindings.findChildViewById(rootView, id);
-      if (messageInput == null) {
+      id = R.id.bottom_navigation;
+      BottomNavigationView bottomNavigation = ViewBindings.findChildViewById(rootView, id);
+      if (bottomNavigation == null) {
         break missingId;
       }
 
-      id = R.id.messages_recycler;
-      RecyclerView messagesRecycler = ViewBindings.findChildViewById(rootView, id);
-      if (messagesRecycler == null) {
-        break missingId;
-      }
-
-      id = R.id.send_button;
-      Button sendButton = ViewBindings.findChildViewById(rootView, id);
-      if (sendButton == null) {
+      id = R.id.nav_host_fragment;
+      FragmentContainerView navHostFragment = ViewBindings.findChildViewById(rootView, id);
+      if (navHostFragment == null) {
         break missingId;
       }
 
@@ -95,8 +84,8 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityMainBinding((LinearLayout) rootView, messageInput, messagesRecycler,
-          sendButton, statusText);
+      return new ActivityMainBinding((LinearLayout) rootView, bottomNavigation, navHostFragment,
+          statusText);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

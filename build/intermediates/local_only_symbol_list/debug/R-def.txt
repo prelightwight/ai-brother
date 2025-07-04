@@ -1,6 +1,7 @@
 R_DEF: Internal format may change without notice
 local
 color black
+color bottom_nav_colors
 color purple_500
 color purple_700
 color teal_200
@@ -11,15 +12,31 @@ drawable input_background
 drawable user_message_background
 id ai_message
 id ai_message_container
+id bottom_navigation
 id message_input
 id messages_recycler
+id nav_brain
+id nav_chat
+id nav_files
+id nav_graph
+id nav_host_fragment
+id nav_images
+id nav_settings
+id placeholder_button
+id placeholder_description
+id placeholder_icon
+id placeholder_title
 id send_button
 id status_text
 id user_message
 id user_message_container
 layout activity_main
+layout fragment_chat
+layout fragment_placeholder
 layout item_message
+menu bottom_nav_menu
 mipmap ic_launcher
+navigation nav_graph
 string app_name
 style Theme.AIBrother
 xml file_paths

@@ -1,10 +1,18 @@
 [
     {
-        "merged": "com.prelightwight.aibrother-mergeDebugResources-28:/layout/item_message.xml",
-        "source": "com.prelightwight.aibrother-main-31:/layout/item_message.xml"
+        "merged": "com.prelightwight.aibrother-mergeDebugResources-47:/layout/activity_main.xml",
+        "source": "com.prelightwight.aibrother-main-50:/layout/activity_main.xml"
     },
     {
-        "merged": "com.prelightwight.aibrother-mergeDebugResources-28:/layout/activity_main.xml",
-        "source": "com.prelightwight.aibrother-main-31:/layout/activity_main.xml"
+        "merged": "com.prelightwight.aibrother-mergeDebugResources-47:/layout/fragment_chat.xml",
+        "source": "com.prelightwight.aibrother-main-50:/layout/fragment_chat.xml"
+    },
+    {
+        "merged": "com.prelightwight.aibrother-mergeDebugResources-47:/layout/fragment_placeholder.xml",
+        "source": "com.prelightwight.aibrother-main-50:/layout/fragment_placeholder.xml"
+    },
+    {
+        "merged": "com.prelightwight.aibrother-mergeDebugResources-47:/layout/item_message.xml",
+        "source": "com.prelightwight.aibrother-main-50:/layout/item_message.xml"
     }
 ]
