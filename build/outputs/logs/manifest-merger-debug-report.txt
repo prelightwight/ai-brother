@@ -9,7 +9,8 @@ MERGED from [com.google.android.material:material:1.9.0] /home/ubuntu/.gradle/ca
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /home/ubuntu/.gradle/caches/transforms-3/066381222a3c290456445e9f47dd4811/transformed/constraintlayout-2.1.4/AndroidManifest.xml:2:1-11:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/ubuntu/.gradle/caches/transforms-3/6d18f32609ed8dac684b0a124aff8ffb/transformed/appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.appcompat:appcompat:1.6.1] /home/ubuntu/.gradle/caches/transforms-3/ad896df5094edaf02d689252808d8011/transformed/appcompat-1.6.1/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/c6251cbd1485ecba5d12b666e1241b8d/transformed/viewpager2-1.0.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.recyclerview:recyclerview:1.3.2] /home/ubuntu/.gradle/caches/transforms-3/c5f38fb91aaacc0041f37e92cff80ce3/transformed/recyclerview-1.3.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] /home/ubuntu/.gradle/caches/transforms-3/67e32276904e5468793738fa724fd304/transformed/viewpager2-1.1.0-beta02/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.fragment:fragment:1.3.6] /home/ubuntu/.gradle/caches/transforms-3/3a058aff86a0fd3051711a2f09c26dd4/transformed/fragment-1.3.6/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.activity:activity:1.6.0] /home/ubuntu/.gradle/caches/transforms-3/13c4577d7d10042495fd1c2e87e74bff/transformed/activity-1.6.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1] /home/ubuntu/.gradle/caches/transforms-3/1f970b4e01255ef18dd4fb6c29b373b2/transformed/lifecycle-viewmodel-savedstate-2.5.1/AndroidManifest.xml:17:1-24:12
@@ -18,6 +19,7 @@ MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/ubuntu/.grad
 MERGED from [androidx.loader:loader:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/ab4bc1114aece0f0837a69e73510b38a/transformed/loader-1.0.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.5.1] /home/ubuntu/.gradle/caches/transforms-3/484c867dee86f61882e15f366ced9b4c/transformed/lifecycle-viewmodel-2.5.1/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.savedstate:savedstate:1.2.0] /home/ubuntu/.gradle/caches/transforms-3/0c12280c41f9729854a241471af2eb94/transformed/savedstate-1.2.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/13b2c81410c8ee773431bbab128d7306/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:17:1-23:12
 MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /home/ubuntu/.gradle/caches/transforms-3/58050b283f4fe3d6fa0121d187380d6e/transformed/emoji2-views-helper-1.2.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.emoji2:emoji2:1.2.0] /home/ubuntu/.gradle/caches/transforms-3/273b6ab2e7a7baa5106e07c8ccec0b96/transformed/emoji2-1.2.0/AndroidManifest.xml:17:1-35:12
 MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /home/ubuntu/.gradle/caches/transforms-3/50ff1a9647e2fc7a3bd2d484851a331e/transformed/drawerlayout-1.1.1/AndroidManifest.xml:17:1-24:12
@@ -27,7 +29,6 @@ MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/ubuntu
 MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/ubuntu/.gradle/caches/transforms-3/8b3bd69c9e02a668b9719277202a3546/transformed/vectordrawable-1.1.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.core:core-ktx:1.9.0] /home/ubuntu/.gradle/caches/transforms-3/278bb89b2a7207dfc004aea0d0abbdf8/transformed/core-ktx-1.9.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.viewpager:viewpager:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/ff5f616193a66ef3a2843ce81aac9303/transformed/viewpager-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.recyclerview:recyclerview:1.1.0] /home/ubuntu/.gradle/caches/transforms-3/56268c7ee260e77e9f9d4c97711c994a/transformed/recyclerview-1.1.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.customview:customview:1.1.0] /home/ubuntu/.gradle/caches/transforms-3/38a3602f73cceb7e98af67b072f72d8f/transformed/customview-1.1.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-3/673628fba701a45c1ecb991d183fc7c3/transformed/core-1.9.0/AndroidManifest.xml:17:1-30:12
 MERGED from [androidx.annotation:annotation-experimental:1.3.0] /home/ubuntu/.gradle/caches/transforms-3/34e23b077bc85a21060d39c1d09e6b0e/transformed/annotation-experimental-1.3.0/AndroidManifest.xml:17:1-22:12
@@ -128,8 +129,10 @@ MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/ubuntu/.gradle/
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/ubuntu/.gradle/caches/transforms-3/6d18f32609ed8dac684b0a124aff8ffb/transformed/appcompat-resources-1.6.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.appcompat:appcompat:1.6.1] /home/ubuntu/.gradle/caches/transforms-3/ad896df5094edaf02d689252808d8011/transformed/appcompat-1.6.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.appcompat:appcompat:1.6.1] /home/ubuntu/.gradle/caches/transforms-3/ad896df5094edaf02d689252808d8011/transformed/appcompat-1.6.1/AndroidManifest.xml:20:5-44
-MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/c6251cbd1485ecba5d12b666e1241b8d/transformed/viewpager2-1.0.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/c6251cbd1485ecba5d12b666e1241b8d/transformed/viewpager2-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.recyclerview:recyclerview:1.3.2] /home/ubuntu/.gradle/caches/transforms-3/c5f38fb91aaacc0041f37e92cff80ce3/transformed/recyclerview-1.3.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.3.2] /home/ubuntu/.gradle/caches/transforms-3/c5f38fb91aaacc0041f37e92cff80ce3/transformed/recyclerview-1.3.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] /home/ubuntu/.gradle/caches/transforms-3/67e32276904e5468793738fa724fd304/transformed/viewpager2-1.1.0-beta02/AndroidManifest.xml:5:5-44
+MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] /home/ubuntu/.gradle/caches/transforms-3/67e32276904e5468793738fa724fd304/transformed/viewpager2-1.1.0-beta02/AndroidManifest.xml:5:5-44
 MERGED from [androidx.fragment:fragment:1.3.6] /home/ubuntu/.gradle/caches/transforms-3/3a058aff86a0fd3051711a2f09c26dd4/transformed/fragment-1.3.6/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.fragment:fragment:1.3.6] /home/ubuntu/.gradle/caches/transforms-3/3a058aff86a0fd3051711a2f09c26dd4/transformed/fragment-1.3.6/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.activity:activity:1.6.0] /home/ubuntu/.gradle/caches/transforms-3/13c4577d7d10042495fd1c2e87e74bff/transformed/activity-1.6.0/AndroidManifest.xml:20:5-44
@@ -146,6 +149,8 @@ MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.5.1] /home/ubuntu/.gradle/
 MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.5.1] /home/ubuntu/.gradle/caches/transforms-3/484c867dee86f61882e15f366ced9b4c/transformed/lifecycle-viewmodel-2.5.1/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.savedstate:savedstate:1.2.0] /home/ubuntu/.gradle/caches/transforms-3/0c12280c41f9729854a241471af2eb94/transformed/savedstate-1.2.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.savedstate:savedstate:1.2.0] /home/ubuntu/.gradle/caches/transforms-3/0c12280c41f9729854a241471af2eb94/transformed/savedstate-1.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/13b2c81410c8ee773431bbab128d7306/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/13b2c81410c8ee773431bbab128d7306/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:20:5-21:38
 MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /home/ubuntu/.gradle/caches/transforms-3/58050b283f4fe3d6fa0121d187380d6e/transformed/emoji2-views-helper-1.2.0/AndroidManifest.xml:5:5-44
 MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /home/ubuntu/.gradle/caches/transforms-3/58050b283f4fe3d6fa0121d187380d6e/transformed/emoji2-views-helper-1.2.0/AndroidManifest.xml:5:5-44
 MERGED from [androidx.emoji2:emoji2:1.2.0] /home/ubuntu/.gradle/caches/transforms-3/273b6ab2e7a7baa5106e07c8ccec0b96/transformed/emoji2-1.2.0/AndroidManifest.xml:21:5-44
@@ -164,8 +169,6 @@ MERGED from [androidx.core:core-ktx:1.9.0] /home/ubuntu/.gradle/caches/transform
 MERGED from [androidx.core:core-ktx:1.9.0] /home/ubuntu/.gradle/caches/transforms-3/278bb89b2a7207dfc004aea0d0abbdf8/transformed/core-ktx-1.9.0/AndroidManifest.xml:5:5-44
 MERGED from [androidx.viewpager:viewpager:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/ff5f616193a66ef3a2843ce81aac9303/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.viewpager:viewpager:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/ff5f616193a66ef3a2843ce81aac9303/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.recyclerview:recyclerview:1.1.0] /home/ubuntu/.gradle/caches/transforms-3/56268c7ee260e77e9f9d4c97711c994a/transformed/recyclerview-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.recyclerview:recyclerview:1.1.0] /home/ubuntu/.gradle/caches/transforms-3/56268c7ee260e77e9f9d4c97711c994a/transformed/recyclerview-1.1.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.customview:customview:1.1.0] /home/ubuntu/.gradle/caches/transforms-3/38a3602f73cceb7e98af67b072f72d8f/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.customview:customview:1.1.0] /home/ubuntu/.gradle/caches/transforms-3/38a3602f73cceb7e98af67b072f72d8f/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-3/673628fba701a45c1ecb991d183fc7c3/transformed/core-1.9.0/AndroidManifest.xml:20:5-44

@@ -2903,6 +2903,7 @@ drawable abc_textfield_search_activated_mtrl_alpha
 drawable abc_textfield_search_default_mtrl_alpha
 drawable abc_textfield_search_material
 drawable abc_vector_test
+drawable ai_message_background
 drawable avd_hide_password
 drawable avd_show_password
 drawable btn_checkbox_checked_mtrl
@@ -2930,6 +2931,7 @@ drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
 drawable ic_search_black_24
+drawable input_background
 drawable m3_appbar_background
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
@@ -3004,6 +3006,7 @@ drawable notify_panel_notification_icon_bg
 drawable test_level_drawable
 drawable tooltip_frame_dark
 drawable tooltip_frame_light
+drawable user_message_background
 id ALT
 id BOTTOM_END
 id BOTTOM_START
@@ -3075,6 +3078,8 @@ id action_text
 id actions
 id activity_chooser_view_content
 id add
+id ai_message
+id ai_message_container
 id alertTitle
 id aligned
 id all
@@ -3228,6 +3233,7 @@ id indeterminate
 id info
 id invisible
 id inward
+id is_pooling_container_tag
 id italic
 id item_touch_helper_previous_elevation
 id jumpToEnd
@@ -3269,6 +3275,8 @@ id material_timepicker_view
 id material_value_index
 id matrix
 id message
+id message_input
+id messages_recycler
 id middle
 id mini
 id month_grid
@@ -3338,6 +3346,7 @@ id pathRelative
 id peekHeight
 id percent
 id pin
+id pooling_container_listener_holder_tag
 id position
 id postLayout
 id pressed
@@ -3390,6 +3399,7 @@ id search_voice_btn
 id select_dialog_listview
 id selected
 id selection_type
+id send_button
 id sharedValueSet
 id sharedValueUnset
 id shortcut
@@ -3423,6 +3433,7 @@ id startToEnd
 id startVertical
 id staticLayout
 id staticPostLayout
+id status_text
 id stop
 id stretch
 id submenuarrow
@@ -3442,7 +3453,6 @@ id tag_transition_group
 id tag_unhandled_key_event_manager
 id tag_unhandled_key_listeners
 id tag_window_insets_animation_callback
-id test_button
 id text
 id text2
 id textEnd
@@ -3480,6 +3490,8 @@ id uniform
 id unlabeled
 id up
 id useLogo
+id user_message
+id user_message_container
 id vertical_only
 id view_offset_helper
 id view_transition
@@ -3628,6 +3640,7 @@ layout design_navigation_menu
 layout design_navigation_menu_item
 layout design_text_input_end_icon
 layout design_text_input_start_icon
+layout item_message
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title

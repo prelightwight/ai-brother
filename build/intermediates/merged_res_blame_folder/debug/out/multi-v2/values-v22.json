@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.prelightwight.aibrother-mergeDebugResources-26:/values-v22/values-v22.xml",
+            "outputFile": "com.prelightwight.aibrother-mergeDebugResources-27:/values-v22/values-v22.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-3/ad896df5094edaf02d689252808d8011/transformed/appcompat-1.6.1/res/values-v22/values-v22.xml",

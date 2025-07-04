@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.prelightwight.aibrother-mergeDebugResources-26:/values-ne/values-ne.xml",
+            "outputFile": "com.prelightwight.aibrother-mergeDebugResources-27:/values-ne/values-ne.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-3/673628fba701a45c1ecb991d183fc7c3/transformed/core-1.9.0/res/values-ne/values-ne.xml",

@@ -1,6 +1,10 @@
 [
     {
-        "merged": "com.prelightwight.aibrother-mergeDebugResources-27:/layout/activity_main.xml",
-        "source": "com.prelightwight.aibrother-main-30:/layout/activity_main.xml"
+        "merged": "com.prelightwight.aibrother-mergeDebugResources-28:/layout/item_message.xml",
+        "source": "com.prelightwight.aibrother-main-31:/layout/item_message.xml"
+    },
+    {
+        "merged": "com.prelightwight.aibrother-mergeDebugResources-28:/layout/activity_main.xml",
+        "source": "com.prelightwight.aibrother-main-31:/layout/activity_main.xml"
     }
 ]

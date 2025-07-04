@@ -5,9 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.prelightwight.aibrother.R;
@@ -20,11 +23,25 @@ public final class ActivityMainBinding implements ViewBinding {
   private final LinearLayout rootView;
 
   @NonNull
-  public final Button testButton;
+  public final EditText messageInput;
 
-  private ActivityMainBinding(@NonNull LinearLayout rootView, @NonNull Button testButton) {
+  @NonNull
+  public final RecyclerView messagesRecycler;
+
+  @NonNull
+  public final Button sendButton;
+
+  @NonNull
+  public final TextView statusText;
+
+  private ActivityMainBinding(@NonNull LinearLayout rootView, @NonNull EditText messageInput,
+      @NonNull RecyclerView messagesRecycler, @NonNull Button sendButton,
+      @NonNull TextView statusText) {
     this.rootView = rootView;
-    this.testButton = testButton;
+    this.messageInput = messageInput;
+    this.messagesRecycler = messagesRecycler;
+    this.sendButton = sendButton;
+    this.statusText = statusText;
   }
 
   @Override
@@ -54,13 +71,32 @@ public final class ActivityMainBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.test_button;
-      Button testButton = ViewBindings.findChildViewById(rootView, id);
-      if (testButton == null) {
+      id = R.id.message_input;
+      EditText messageInput = ViewBindings.findChildViewById(rootView, id);
+      if (messageInput == null) {
         break missingId;
       }
 
-      return new ActivityMainBinding((LinearLayout) rootView, testButton);
+      id = R.id.messages_recycler;
+      RecyclerView messagesRecycler = ViewBindings.findChildViewById(rootView, id);
+      if (messagesRecycler == null) {
+        break missingId;
+      }
+
+      id = R.id.send_button;
+      Button sendButton = ViewBindings.findChildViewById(rootView, id);
+      if (sendButton == null) {
+        break missingId;
+      }
+
+      id = R.id.status_text;
+      TextView statusText = ViewBindings.findChildViewById(rootView, id);
+      if (statusText == null) {
+        break missingId;
+      }
+
+      return new ActivityMainBinding((LinearLayout) rootView, messageInput, messagesRecycler,
+          sendButton, statusText);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));
