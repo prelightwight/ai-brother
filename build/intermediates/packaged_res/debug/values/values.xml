@@ -1,16 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="purple_500">#6200EE</color>
-    <color name="purple_700">#3700B3</color>
-    <color name="teal_200">#03DAC6</color>
-    <color name="teal_700">#018786</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="ai_bubble_dark">#2D2D2D</color>
+    <color name="ai_bubble_light">#E8EAF0</color>
+    <color name="background_dark">#121212</color>
+    <color name="background_light">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="colorAccent">#9C27B0</color>
+    <color name="colorPrimary">#673AB7</color>
+    <color name="colorPrimaryDark">#512DA8</color>
+    <color name="divider_dark">#444444</color>
+    <color name="divider_light">#E0E0E0</color>
+    <color name="input_background_dark">#2D2D2D</color>
+    <color name="input_background_light">#FFFFFF</color>
+    <color name="nav_bar_dark">#1E1E1E</color>
+    <color name="nav_bar_light">#FFFFFF</color>
+    <color name="primary_dark">#9C27B0</color>
+    <color name="primary_light">#673AB7</color>
+    <color name="status_bar_dark">#7B1FA2</color>
+    <color name="status_bar_light">#673AB7</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="text_primary_dark">#FFFFFF</color>
+    <color name="text_primary_light">#000000</color>
+    <color name="text_secondary_dark">#CCCCCC</color>
+    <color name="text_secondary_light">#666666</color>
+    <color name="transparent">#00000000</color>
+    <color name="user_bubble_dark">#9C27B0</color>
+    <color name="user_bubble_light">#673AB7</color>
+    <color name="white">#FFFFFF</color>
     <string name="app_name">AI Brother</string>
-    <style name="Theme.AIBrother" parent="Theme.AppCompat.Light">
-        
-        <item name="colorPrimary">#6200EE</item>
-        <item name="colorPrimaryDark">#3700B3</item>
-        <item name="colorAccent">#03DAC5</item>
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#673AB7</item>
+        <item name="colorPrimaryVariant">#512DA8</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#9C27B0</item>
+        <item name="colorSecondaryVariant">#7B1FA2</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="android:colorBackground">#FFFFFF</item>
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#000000</item>
+        <item name="colorOnBackground">#000000</item>
+        <item name="android:statusBarColor">@color/status_bar_light</item>
+        <item name="android:navigationBarColor">@color/nav_bar_light</item>
+    </style>
+    <style name="AppThemeDark" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#9C27B0</item>
+        <item name="colorPrimaryVariant">#7B1FA2</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#E1BEE7</item>
+        <item name="colorSecondaryVariant">#CE93D8</item>
+        <item name="colorOnSecondary">#000000</item>
+        <item name="android:colorBackground">#121212</item>
+        <item name="colorSurface">#1E1E1E</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+        <item name="colorOnBackground">#FFFFFF</item>
+        <item name="android:statusBarColor">@color/status_bar_dark</item>
+        <item name="android:navigationBarColor">@color/nav_bar_dark</item>
     </style>
 </resources>

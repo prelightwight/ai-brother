@@ -29,15 +29,26 @@ class ChatAdapter(private val messages: MutableList<ChatMessage>) : RecyclerView
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val message = messages[position]
+        val context = holder.itemView.context
         
         if (message.isUser) {
             holder.userContainer.visibility = View.VISIBLE
             holder.aiContainer.visibility = View.GONE
             holder.userMessage.text = message.content
+            
+            // Apply theme-aware background and font size
+            val background = ThemeManager.getMessageBubbleBackground(context, true)
+            holder.userMessage.setBackgroundResource(background)
+            ThemeManager.applyFontSize(context, holder.userMessage)
         } else {
             holder.userContainer.visibility = View.GONE
             holder.aiContainer.visibility = View.VISIBLE
             holder.aiMessage.text = message.content
+            
+            // Apply theme-aware background and font size
+            val background = ThemeManager.getMessageBubbleBackground(context, false)
+            holder.aiMessage.setBackgroundResource(background)
+            ThemeManager.applyFontSize(context, holder.aiMessage)
         }
     }
     

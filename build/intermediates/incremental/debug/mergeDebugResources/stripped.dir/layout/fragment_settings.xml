@@ -419,6 +419,14 @@
                 android:backgroundTint="#F44336" />
             
             <Button
+                android:id="@+id/replay_tutorial_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📚 Replay Tutorial"
+                android:layout_marginBottom="8dp"
+                android:backgroundTint="#9C27B0" />
+            
+            <Button
                 android:id="@+id/test_settings_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

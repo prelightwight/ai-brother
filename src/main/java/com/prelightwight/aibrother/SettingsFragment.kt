@@ -41,6 +41,7 @@ class SettingsFragment : Fragment() {
     // Action Buttons
     private lateinit var resetSettingsButton: Button
     private lateinit var testSettingsButton: Button
+    private lateinit var replayTutorialButton: Button
     
     // Preference keys
     companion object {
@@ -110,6 +111,7 @@ class SettingsFragment : Fragment() {
         // Action Buttons
         resetSettingsButton = view.findViewById(R.id.reset_settings_button)
         testSettingsButton = view.findViewById(R.id.test_settings_button)
+        replayTutorialButton = view.findViewById(R.id.replay_tutorial_button)
     }
     
     private fun setupSpinners() {
@@ -284,6 +286,10 @@ class SettingsFragment : Fragment() {
                 .setPositiveButton("OK", null)
                 .show()
         }
+        
+        replayTutorialButton.setOnClickListener {
+            startTutorial()
+        }
     }
     
     private fun loadSettings() {
@@ -397,5 +403,13 @@ class SettingsFragment : Fragment() {
     
     fun getResponseStyle(): Int {
         return sharedPrefs.getInt(PREF_RESPONSE_STYLE, 0)
+    }
+    
+    private fun startTutorial() {
+        val mainActivity = activity as? MainActivity
+        mainActivity?.let { activity ->
+            val tutorialManager = TutorialManager(activity)
+            tutorialManager.startTutorialFromSettings()
+        }
     }
 }
