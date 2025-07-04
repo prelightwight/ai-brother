@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application") version "8.2.2"
     id("org.jetbrains.kotlin.android") version "1.9.22"
-    id("org.jetbrains.kotlin.kapt") version "1.9.22"
 }
 
 android {
@@ -10,29 +9,16 @@ android {
 
     defaultConfig {
         applicationId = "com.prelightwight.aibrother"
-        minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = 21
+        targetSdk = 28
+        versionCode = 3  // Test version
+        versionName = "1.2-test"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
         
-        // NDK configuration for native builds
+        // Explicit ABI support for Xiaomi Mi 8
         ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
-        }
-    }
-
-    // Configure source sets for the non-standard directory structure
-    sourceSets {
-        getByName("main") {
-            java.srcDirs(".")
-            kotlin.srcDirs(".")
-            res.srcDirs("res")
-            manifest.srcFile("AndroidManifest.xml")
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
     }
 
@@ -43,6 +29,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        debug {
+            isMinifyEnabled = false
+            isDebuggable = true
         }
     }
 
@@ -56,76 +47,40 @@ android {
     }
 
     buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        viewBinding = true  // Use view binding instead of Compose
     }
 
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
-    }
-    
-    // External native build configuration for llama.cpp integration
-    // Made conditional to allow Android Studio sync without NDK
-    if (System.getenv("ENABLE_NATIVE_BUILD") == "true") {
-        externalNativeBuild {
-            cmake {
-                path = file("CMakeLists.txt")
-                version = "3.22.1"
-            }
+        jniLibs {
+            useLegacyPackaging = true
         }
+    }
+
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+        disable += "ExpiredTargetSdkVersion"
     }
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2024.03.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-
-    // ViewModel and Lifecycle for better architecture
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
-
-    // Room
-    implementation("androidx.room:room-runtime:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-
-    // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-    // Networking for model downloads
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-
-    // JSON parsing
-    implementation("com.google.code.gson:gson:2.10.1")
-
-    // Work Manager for background downloads
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
-
-    // Permissions handling
-    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+    // Android dependencies
+    implementation("androidx.core:core-ktx:1.8.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    
+    // RecyclerView for chat interface
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    
+    // Navigation and Fragments
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.0")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.03.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
