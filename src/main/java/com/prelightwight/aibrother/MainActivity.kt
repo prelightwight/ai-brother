@@ -1,16 +1,18 @@
 package com.prelightwight.aibrother
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            AppRoot()
+        setContentView(R.layout.activity_main)
+        
+        // Simple button click listener for testing
+        findViewById<Button>(R.id.test_button).setOnClickListener {
+            Toast.makeText(this, "AI Brother is working!", Toast.LENGTH_SHORT).show()
         }
     }
 }
