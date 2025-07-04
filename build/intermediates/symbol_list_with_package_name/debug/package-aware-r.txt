@@ -3144,6 +3144,8 @@ id auto
 id autoComplete
 id autoCompleteToEnd
 id autoCompleteToStart
+id auto_backup_switch
+id auto_delete_spinner
 id barrier
 id baseline
 id beginOnFirstDraw
@@ -3173,6 +3175,7 @@ id checkbox
 id checked
 id chronometer
 id circle_center
+id clear_chat_button
 id clear_text
 id clip_horizontal
 id clip_vertical
@@ -3191,10 +3194,13 @@ id coordinator
 id cos
 id counterclockwise
 id cradle
+id creativity_seekbar
+id creativity_value
 id currentState
 id custom
 id customPanel
 id cut
+id dark_theme_switch
 id date_picker_actions
 id decelerate
 id decelerateAndComplete
@@ -3239,6 +3245,7 @@ id enterAlwaysCollapsed
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu
+id export_data_button
 id fade
 id fill
 id fill_horizontal
@@ -3252,6 +3259,8 @@ id fitXY
 id fixed
 id flip
 id floating
+id font_size_seekbar
+id font_size_value
 id forever
 id fragment_container_view_tag
 id frost
@@ -3297,6 +3306,7 @@ id line3
 id linear
 id listMode
 id list_item
+id local_processing_switch
 id locale
 id ltr
 id m3_side_sheet
@@ -3325,6 +3335,7 @@ id material_timepicker_ok_button
 id material_timepicker_view
 id material_value_index
 id matrix
+id memory_switch
 id message
 id message_input
 id messages_recycler
@@ -3388,6 +3399,7 @@ id north
 id notification_background
 id notification_main_column
 id notification_main_column_container
+id notifications_switch
 id off
 id on
 id onInterceptTouchReturnSwipe
@@ -3420,12 +3432,17 @@ id radio
 id ratio
 id rectangles
 id report_drawn
+id reset_settings_button
+id response_speed_seekbar
+id response_speed_value
+id response_style_spinner
 id reverseSawtooth
 id right
 id rightToLeft
 id right_icon
 id right_side
 id rounded
+id rounded_bubbles_switch
 id row_index_key
 id rtl
 id save_non_transition_alpha
@@ -3521,6 +3538,7 @@ id tag_transition_group
 id tag_unhandled_key_event_manager
 id tag_unhandled_key_listeners
 id tag_window_insets_animation_callback
+id test_settings_button
 id text
 id text2
 id textEnd
@@ -3711,6 +3729,7 @@ layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout fragment_chat
 layout fragment_placeholder
+layout fragment_settings
 layout item_message
 layout m3_alert_dialog
 layout m3_alert_dialog_actions

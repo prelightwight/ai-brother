@@ -24,6 +24,10 @@
         "source": "com.prelightwight.aibrother-main-50:/mipmap-xxhdpi/ic_launcher.xml"
     },
     {
+        "merged": "com.prelightwight.aibrother-merged_res-48:/layout_fragment_settings.xml.flat",
+        "source": "com.prelightwight.aibrother-main-50:/layout/fragment_settings.xml"
+    },
+    {
         "merged": "com.prelightwight.aibrother-merged_res-48:/layout_item_message.xml.flat",
         "source": "com.prelightwight.aibrother-main-50:/layout/item_message.xml"
     },

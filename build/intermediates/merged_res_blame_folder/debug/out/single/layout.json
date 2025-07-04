@@ -4,6 +4,10 @@
         "source": "com.prelightwight.aibrother-main-50:/layout/activity_main.xml"
     },
     {
+        "merged": "com.prelightwight.aibrother-mergeDebugResources-47:/layout/fragment_settings.xml",
+        "source": "com.prelightwight.aibrother-main-50:/layout/fragment_settings.xml"
+    },
+    {
         "merged": "com.prelightwight.aibrother-mergeDebugResources-47:/layout/fragment_chat.xml",
         "source": "com.prelightwight.aibrother-main-50:/layout/fragment_chat.xml"
     },
