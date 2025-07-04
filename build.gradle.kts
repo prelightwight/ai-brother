@@ -21,13 +21,13 @@ android {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
         
-        // Temporarily disable native build until NDK is properly configured
-        // externalNativeBuild {
-        //     cmake {
-        //         cppFlags += listOf("-std=c++17", "-frtti", "-fexceptions")
-        //         abiFilters += listOf("armeabi-v7a", "arm64-v8a")
-        //     }
-        // }
+        // Enable native build with llama.cpp integration
+        externalNativeBuild {
+            cmake {
+                cppFlags += listOf("-std=c++17", "-frtti", "-fexceptions")
+                abiFilters += listOf("arm64-v8a")
+            }
+        }
     }
 
     buildTypes {
@@ -58,13 +58,13 @@ android {
         viewBinding = true  // Use view binding instead of Compose
     }
 
-    // Temporarily disable native build configuration
-    // externalNativeBuild {
-    //     cmake {
-    //         path = file("CMakeLists.txt")
-    //         version = "3.22.1"
-    //     }
-    // }
+    // Enable native build configuration for llama.cpp
+    externalNativeBuild {
+        cmake {
+            path = file("CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
 
     packaging {
         resources {
