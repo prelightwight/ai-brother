@@ -117,13 +117,13 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /home/ubuntu/.gradle/caches
 	android:allowBackup
 		ADDED from /workspace/src/main/AndroidManifest.xml:14:9-35
 	android:theme
-		ADDED from /workspace/src/main/AndroidManifest.xml:13:9-47
+		ADDED from /workspace/src/main/AndroidManifest.xml:13:9-40
 activity#com.prelightwight.aibrother.MainActivity
 ADDED from /workspace/src/main/AndroidManifest.xml:18:9-26:20
 	android:exported
 		ADDED from /workspace/src/main/AndroidManifest.xml:20:13-36
 	android:theme
-		ADDED from /workspace/src/main/AndroidManifest.xml:21:13-51
+		ADDED from /workspace/src/main/AndroidManifest.xml:21:13-44
 	android:name
 		ADDED from /workspace/src/main/AndroidManifest.xml:19:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER

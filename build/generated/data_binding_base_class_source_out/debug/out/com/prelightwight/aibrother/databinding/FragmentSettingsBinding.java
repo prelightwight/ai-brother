@@ -60,6 +60,9 @@ public final class FragmentSettingsBinding implements ViewBinding {
   public final Switch notificationsSwitch;
 
   @NonNull
+  public final Button replayTutorialButton;
+
+  @NonNull
   public final Button resetSettingsButton;
 
   @NonNull
@@ -83,10 +86,10 @@ public final class FragmentSettingsBinding implements ViewBinding {
       @NonNull Switch darkThemeSwitch, @NonNull Button exportDataButton,
       @NonNull SeekBar fontSizeSeekbar, @NonNull TextView fontSizeValue,
       @NonNull Switch localProcessingSwitch, @NonNull Switch memorySwitch,
-      @NonNull Switch notificationsSwitch, @NonNull Button resetSettingsButton,
-      @NonNull SeekBar responseSpeedSeekbar, @NonNull TextView responseSpeedValue,
-      @NonNull Spinner responseStyleSpinner, @NonNull Switch roundedBubblesSwitch,
-      @NonNull Button testSettingsButton) {
+      @NonNull Switch notificationsSwitch, @NonNull Button replayTutorialButton,
+      @NonNull Button resetSettingsButton, @NonNull SeekBar responseSpeedSeekbar,
+      @NonNull TextView responseSpeedValue, @NonNull Spinner responseStyleSpinner,
+      @NonNull Switch roundedBubblesSwitch, @NonNull Button testSettingsButton) {
     this.rootView = rootView;
     this.autoBackupSwitch = autoBackupSwitch;
     this.autoDeleteSpinner = autoDeleteSpinner;
@@ -100,6 +103,7 @@ public final class FragmentSettingsBinding implements ViewBinding {
     this.localProcessingSwitch = localProcessingSwitch;
     this.memorySwitch = memorySwitch;
     this.notificationsSwitch = notificationsSwitch;
+    this.replayTutorialButton = replayTutorialButton;
     this.resetSettingsButton = resetSettingsButton;
     this.responseSpeedSeekbar = responseSpeedSeekbar;
     this.responseSpeedValue = responseSpeedValue;
@@ -207,6 +211,12 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.replay_tutorial_button;
+      Button replayTutorialButton = ViewBindings.findChildViewById(rootView, id);
+      if (replayTutorialButton == null) {
+        break missingId;
+      }
+
       id = R.id.reset_settings_button;
       Button resetSettingsButton = ViewBindings.findChildViewById(rootView, id);
       if (resetSettingsButton == null) {
@@ -246,8 +256,8 @@ public final class FragmentSettingsBinding implements ViewBinding {
       return new FragmentSettingsBinding((ScrollView) rootView, autoBackupSwitch, autoDeleteSpinner,
           clearChatButton, creativitySeekbar, creativityValue, darkThemeSwitch, exportDataButton,
           fontSizeSeekbar, fontSizeValue, localProcessingSwitch, memorySwitch, notificationsSwitch,
-          resetSettingsButton, responseSpeedSeekbar, responseSpeedValue, responseStyleSpinner,
-          roundedBubblesSwitch, testSettingsButton);
+          replayTutorialButton, resetSettingsButton, responseSpeedSeekbar, responseSpeedValue,
+          responseStyleSpinner, roundedBubblesSwitch, testSettingsButton);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

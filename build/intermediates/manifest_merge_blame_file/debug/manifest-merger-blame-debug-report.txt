@@ -43,16 +43,16 @@
 29-->/workspace/src/main/AndroidManifest.xml:12:9-43
 30        android:label="@string/app_name"
 30-->/workspace/src/main/AndroidManifest.xml:11:9-41
-31        android:theme="@style/Theme.AIBrother" >
-31-->/workspace/src/main/AndroidManifest.xml:13:9-47
+31        android:theme="@style/AppTheme" >
+31-->/workspace/src/main/AndroidManifest.xml:13:9-40
 32        <activity
 32-->/workspace/src/main/AndroidManifest.xml:18:9-26:20
 33            android:name="com.prelightwight.aibrother.MainActivity"
 33-->/workspace/src/main/AndroidManifest.xml:19:13-41
 34            android:exported="true"
 34-->/workspace/src/main/AndroidManifest.xml:20:13-36
-35            android:theme="@style/Theme.AIBrother" >
-35-->/workspace/src/main/AndroidManifest.xml:21:13-51
+35            android:theme="@style/AppTheme" >
+35-->/workspace/src/main/AndroidManifest.xml:21:13-44
 36            <intent-filter>
 36-->/workspace/src/main/AndroidManifest.xml:22:13-25:29
 37                <action android:name="android.intent.action.MAIN" />
