@@ -53,8 +53,7 @@ class MainActivity : AppCompatActivity() {
             statusText.text = when (destination.id) {
                 R.id.nav_chat -> "Ready"
                 R.id.nav_brain -> "Brain Mode"
-                R.id.nav_files -> "Files Mode"
-                R.id.nav_images -> "Images Mode"
+                R.id.nav_files -> "Files & Images Mode"
                 R.id.nav_models -> "Models"
                 R.id.nav_settings -> "Settings Mode"
                 else -> "Ready"

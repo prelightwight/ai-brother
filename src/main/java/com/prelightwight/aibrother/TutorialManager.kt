@@ -48,9 +48,9 @@ class TutorialManager(private val activity: Activity) {
             highlightType = HighlightType.CIRCLE
         ),
         TutorialStep(
-            title = "Image Analysis 🖼️",
-            description = "Take photos or upload images for AI analysis. Get descriptions, extract text, and more!",
-            targetViewId = R.id.nav_images,
+            title = "File & Image Management ��🖼️",
+            description = "Upload and analyze documents and images here. AI Brother can help you understand files and analyze photos!",
+            targetViewId = R.id.nav_files,
             highlightType = HighlightType.CIRCLE
         ),
         TutorialStep(

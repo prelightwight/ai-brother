@@ -17,11 +17,6 @@
         android:title="Files" />
     
     <item
-        android:id="@+id/nav_images"
-        android:icon="@android:drawable/ic_menu_camera"
-        android:title="Images" />
-    
-    <item
         android:id="@+id/nav_models"
         android:icon="@android:drawable/ic_menu_save"
         android:title="Models" />

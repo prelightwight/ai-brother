@@ -238,9 +238,35 @@ class FilesFragment : Fragment() {
     }
     
     private fun uploadImage() {
-        Toast.makeText(requireContext(), "📸 Image upload will redirect to Images tab for processing", Toast.LENGTH_LONG).show()
-        // Switch to images tab
-        activity?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_navigation)?.selectedItemId = R.id.nav_images
+        val fileName = "Photo_${System.currentTimeMillis()}.jpg"
+        val newFile = FileInfo(
+            fileName,
+            "Image",
+            "2.1 MB",
+            "Just now",
+            "⏳ Analyzing...",
+            "Recently uploaded image"
+        )
+        
+        mockFiles.add(0, newFile)
+        setupFilesList()
+        updateFileStats()
+        updateStatus("📸 Image uploaded successfully")
+        
+        // Simulate analysis completion
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                activity?.runOnUiThread {
+                    newFile.status = "✅ Analyzed"
+                    newFile.summary = "Image has been analyzed for content recognition and text extraction"
+                    setupFilesList()
+                    updateFileStats()
+                    Toast.makeText(requireContext(), "✅ Image analysis complete!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }, 3500)
+        
+        Toast.makeText(requireContext(), "📸 Image uploaded! Analyzing visual content...", Toast.LENGTH_LONG).show()
     }
     
     private fun uploadMultipleFiles() {

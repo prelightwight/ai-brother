@@ -84,7 +84,6 @@ id nav_chat
 id nav_files
 id nav_graph
 id nav_host_fragment
-id nav_images
 id nav_models
 id nav_settings
 id notifications_switch

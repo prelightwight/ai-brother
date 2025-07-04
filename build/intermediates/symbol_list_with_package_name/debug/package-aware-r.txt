@@ -3431,7 +3431,6 @@ id nav_files
 id nav_graph
 id nav_host_fragment
 id nav_host_fragment_container
-id nav_images
 id nav_models
 id nav_settings
 id navigation_bar_item_active_indicator_view
