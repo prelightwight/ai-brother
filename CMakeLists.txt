@@ -18,11 +18,9 @@ set(GGML_LTO OFF CACHE BOOL "" FORCE)
 
 # Android-specific fixes for compatibility
 if(ANDROID)
-    add_definitions(-D__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__)
-    add_definitions(-DPOSIX_MADV_WILLNEED=1)
-    add_definitions(-DPOSIX_MADV_RANDOM=1)
-    # Stub out posix_madvise for Android compatibility
-    add_definitions(-Dposix_madvise\(...\)=0)
+    # Include our Android compatibility header
+    include_directories(src/main/cpp)
+    add_definitions(-DANDROID_COMPAT)
 endif()
 
 # Add llama.cpp subdirectory

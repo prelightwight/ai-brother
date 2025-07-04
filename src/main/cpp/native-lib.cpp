@@ -6,6 +6,11 @@
 #include <mutex>
 #include <android/log.h>
 
+// Android compatibility layer
+#ifdef ANDROID_COMPAT
+#include "android_compat.h"
+#endif
+
 // Real llama.cpp includes
 #include "llama.h"
 
