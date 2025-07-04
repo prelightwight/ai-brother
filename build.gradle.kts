@@ -26,18 +26,6 @@ android {
         }
     }
 
-    // Configure source sets for the non-standard directory structure
-    sourceSets {
-        getByName("main") {
-            java.srcDirs("src/main/java", ".")
-            kotlin.srcDirs("src/main/kotlin", ".") {
-                exclude("build/", ".gradle/", "res/", "gradle/", "licenses/", "models/", "external/", "platforms/", "platform-tools/", "build-tools/")
-            }
-            res.srcDirs("res")
-            manifest.srcFile("AndroidManifest.xml")
-        }
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -83,16 +71,10 @@ android {
     }
 }
 
-// Add kapt configuration to fix dependency issues
+// Configure kapt
 kapt {
     correctErrorTypes = true
     useBuildCache = true
-    
-    arguments {
-        arg("room.schemaLocation", "$projectDir/schemas")
-        arg("room.incremental", "true")
-        arg("room.expandProjection", "true")
-    }
 }
 
 dependencies {
