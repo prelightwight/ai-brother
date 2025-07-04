@@ -115,6 +115,7 @@ class ChatFragment : Fragment() {
     private fun updateModelDisplay() {
         val isLoaded = llamaInterface.isModelLoaded()
         val modelPath = llamaInterface.getLoadedModelPath()
+        android.util.Log.d("ChatFragment", "updateModelDisplay - isLoaded: $isLoaded, modelPath: '$modelPath'")
         
         if (isLoaded && modelPath.isNotEmpty()) {
             val modelName = getModelDisplayName(modelPath)
@@ -190,10 +191,17 @@ class ChatFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val modelPath = modelDownloader.getModelFilePath(model).absolutePath
+                android.util.Log.d("ChatFragment", "Loading model: ${model.displayName} from path: $modelPath")
+                
                 val success = llamaInterface.loadModel(modelPath)
                 
+                // Double-check the loading result
+                val isLoaded = llamaInterface.isModelLoaded()
+                val loadedPath = llamaInterface.getLoadedModelPath()
+                android.util.Log.d("ChatFragment", "Load result: success=$success, isLoaded=$isLoaded, loadedPath=$loadedPath")
+                
                 handler.post {
-                    if (success) {
+                    if (success && isLoaded) {
                         Toast.makeText(requireContext(), "Model loaded: ${model.displayName}", Toast.LENGTH_SHORT).show()
                         updateMainActivityStatus("AI Ready")
                         updateModelDisplay()
@@ -201,13 +209,14 @@ class ChatFragment : Fragment() {
                         // Add a system message about the model change
                         addAiMessage("🧠 Switched to ${model.displayName}! I'm ready to chat with enhanced AI capabilities.")
                     } else {
-                        Toast.makeText(requireContext(), "Failed to load model", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), "Failed to load model (success=$success, loaded=$isLoaded)", Toast.LENGTH_LONG).show()
                         updateModelDisplay()
                     }
                     selectModelButton.isEnabled = true
                 }
                 
             } catch (e: Exception) {
+                android.util.Log.e("ChatFragment", "Exception loading model", e)
                 handler.post {
                     Toast.makeText(requireContext(), "Error loading model: ${e.message}", Toast.LENGTH_LONG).show()
                     updateModelDisplay()
@@ -229,9 +238,13 @@ class ChatFragment : Fragment() {
         val message = messageInput.text.toString().trim()
         if (message.isEmpty()) return
         
-        // Check if model is loaded
-        if (!llamaInterface.isModelLoaded()) {
-            Toast.makeText(requireContext(), "Please select a model first!", Toast.LENGTH_SHORT).show()
+        // Check if model is loaded with debugging
+        val modelLoaded = llamaInterface.isModelLoaded()
+        val modelPath = llamaInterface.getLoadedModelPath()
+        android.util.Log.d("ChatFragment", "Sending message - Model loaded: $modelLoaded, Path: $modelPath")
+        
+        if (!modelLoaded) {
+            Toast.makeText(requireContext(), "Please select a model first! (Debug: path='$modelPath')", Toast.LENGTH_LONG).show()
             showModelSelectionDialog()
             return
         }
