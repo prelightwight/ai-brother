@@ -113,6 +113,7 @@ cmake-build-*/
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
 
-# Release APKs (we'll add them manually to releases)
+# Debug APKs (but allow releases)
 ai-brother-debug.apk
-*.apk
+# Allow release APKs
+!releases/*.apk
