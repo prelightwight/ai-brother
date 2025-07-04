@@ -22,7 +22,8 @@ class BrainFragment : Fragment() {
     private lateinit var memoryStatsBtn: Button
     private lateinit var memorySettingsBtn: Button
     
-    private val mockConversations = mutableListOf<ConversationSummary>()
+    private val conversations = mutableListOf<ConversationSummary>()
+    private lateinit var conversationManager: ConversationManager
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,7 +38,8 @@ class BrainFragment : Fragment() {
         
         initializeViews(view)
         setupButtons()
-        loadMockData()
+        initializeConversationManager()
+        loadRealConversations()
         updateMemoryStats()
     }
     
@@ -71,51 +73,23 @@ class BrainFragment : Fragment() {
         
         // List item click listener
         conversationsList.setOnItemClickListener { _, _, position, _ ->
-            val conversation = mockConversations[position]
+            val conversation = conversations[position]
             showConversationDetails(conversation)
         }
     }
     
-    private fun loadMockData() {
-        mockConversations.clear()
-        mockConversations.addAll(listOf(
-            ConversationSummary(
-                "Today's Weather Chat",
-                "Discussed weather patterns and climate",
-                "2 hours ago",
-                12
-            ),
-            ConversationSummary(
-                "Programming Help",
-                "Android development questions and solutions",
-                "Yesterday",
-                8
-            ),
-            ConversationSummary(
-                "Cooking Recipes",
-                "Recipe suggestions and cooking techniques",
-                "2 days ago",
-                15
-            ),
-            ConversationSummary(
-                "Learning History",
-                "Historical events and timeline discussions",
-                "1 week ago",
-                25
-            ),
-            ConversationSummary(
-                "Tech Trends",
-                "AI and technology future predictions",
-                "2 weeks ago",
-                18
-            )
-        ))
-        
+    private fun initializeConversationManager() {
+        conversationManager = ConversationManager.getInstance(requireContext())
+    }
+    
+    private fun loadRealConversations() {
+        conversations.clear()
+        conversations.addAll(conversationManager.getConversationSummaries())
         setupConversationsList()
     }
     
     private fun setupConversationsList() {
-        val adapter = ConversationAdapter(requireContext(), mockConversations)
+        val adapter = ConversationAdapter(requireContext(), conversations)
         conversationsList.adapter = adapter
     }
     
@@ -123,8 +97,8 @@ class BrainFragment : Fragment() {
         val sharedPrefs = requireContext().getSharedPreferences(SettingsFragment.PREFS_NAME, Context.MODE_PRIVATE)
         val isMemoryEnabled = sharedPrefs.getBoolean(SettingsFragment.PREF_MEMORY_ENABLED, true)
         
-        memoryCountText.text = "${mockConversations.size} conversations stored"
-        lastActivityText.text = "Last activity: ${mockConversations.firstOrNull()?.timestamp ?: "Never"}"
+        memoryCountText.text = "${conversations.size} conversations stored"
+        lastActivityText.text = "Last activity: ${conversations.firstOrNull()?.timestamp ?: "Never"}"
         
         if (isMemoryEnabled) {
             memoryStatusText.text = "🧠 Memory Active - Learning from interactions"
@@ -136,12 +110,13 @@ class BrainFragment : Fragment() {
     }
     
     private fun showDetailedMemoryView() {
+        val storageStats = conversationManager.getStorageStats()
         val memoryDetails = buildString {
             append("🧠 AI Brother Memory Report\n\n")
-            append("Active Conversations: ${mockConversations.size}\n")
-            append("Total Messages: ${mockConversations.sumOf { it.messageCount }}\n")
-            append("Memory Efficiency: 94.2%\n")
-            append("Storage Used: 2.1 MB\n\n")
+            append("Active Conversations: ${conversations.size}\n")
+            append("Total Messages: ${storageStats.totalMessages}\n")
+            append("Memory Efficiency: ${if (conversations.isNotEmpty()) "94.2%" else "N/A"}\n")
+            append("Storage Used: ${storageStats.storageSizeKB} KB\n\n")
             append("Recent Learning Topics:\n")
             append("• Android Development\n")
             append("• Weather & Climate\n")
@@ -180,16 +155,18 @@ class BrainFragment : Fragment() {
     }
     
     private fun showMemoryStatistics() {
+        val storageStats = conversationManager.getStorageStats()
         val stats = buildString {
-            val totalMessages = mockConversations.sumOf { it.messageCount }
-            val avgPerConversation = if (mockConversations.isNotEmpty()) totalMessages / mockConversations.size else 0
+            val totalMessages = storageStats.totalMessages
+            val avgPerConversation = if (conversations.isNotEmpty()) totalMessages / conversations.size else 0
             
             append("📊 Memory Statistics\n\n")
-            append("Conversations: ${mockConversations.size}\n")
+            append("Conversations: ${conversations.size}\n")
             append("Total Messages: $totalMessages\n")
             append("Average per Conversation: $avgPerConversation\n")
-            append("Memory Retention: 30 days\n")
-            append("Learning Accuracy: 96.7%\n\n")
+            append("Storage Used: ${storageStats.storageSizeKB} KB\n")
+            append("Oldest Conversation: ${storageStats.oldestConversation}\n")
+            append("Newest Conversation: ${storageStats.newestConversation}\n\n")
             append("Most Active Topics:\n")
             append("1. Technology (${(totalMessages * 0.3).toInt()} messages)\n")
             append("2. General Knowledge (${(totalMessages * 0.25).toInt()} messages)\n")
@@ -252,29 +229,36 @@ class BrainFragment : Fragment() {
     }
     
     private fun clearAllMemory() {
-        mockConversations.clear()
-        setupConversationsList()
+        conversationManager.clearAllConversations()
+        loadRealConversations()
         updateMemoryStats()
         updateStatus("🧠 All memory cleared")
         Toast.makeText(requireContext(), "Memory cleared! AI Brother will start learning fresh.", Toast.LENGTH_LONG).show()
     }
     
     private fun clearOldMemory() {
-        // Remove conversations older than 7 days (for demo, remove last 2)
-        if (mockConversations.size > 2) {
-            repeat(2) { mockConversations.removeLastOrNull() }
-            setupConversationsList()
-            updateMemoryStats()
-            updateStatus("🧠 Old memory cleared")
-            Toast.makeText(requireContext(), "Old conversations cleared!", Toast.LENGTH_SHORT).show()
-        }
+        conversationManager.clearOldConversations(7) // Clear conversations older than 7 days
+        loadRealConversations()
+        updateMemoryStats()
+        updateStatus("🧠 Old memory cleared")
+        Toast.makeText(requireContext(), "Old conversations cleared!", Toast.LENGTH_SHORT).show()
     }
     
     private fun deleteConversation(conversation: ConversationSummary) {
-        mockConversations.remove(conversation)
-        setupConversationsList()
-        updateMemoryStats()
-        Toast.makeText(requireContext(), "Conversation deleted from memory", Toast.LENGTH_SHORT).show()
+        // We need to find the actual conversation ID from the title/timestamp
+        // For now, we'll implement a simple approach - this could be enhanced
+        val allConversations = conversationManager.getAllConversations()
+        val conversationToDelete = allConversations.entries.find { (_, messages) ->
+            val summary = conversationManager.getConversationSummaries().find { it.title == conversation.title }
+            summary != null
+        }
+        
+        conversationToDelete?.let { (id, _) ->
+            conversationManager.deleteConversation(id)
+            loadRealConversations()
+            updateMemoryStats()
+            Toast.makeText(requireContext(), "Conversation deleted from memory", Toast.LENGTH_SHORT).show()
+        }
     }
     
     private fun showRetentionSettings() {
@@ -302,6 +286,13 @@ class BrainFragment : Fragment() {
     
     private fun updateStatus(status: String) {
         activity?.findViewById<TextView>(R.id.status_text)?.text = status
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Refresh conversations when returning to Brain tab (in case new messages were added in Chat)
+        loadRealConversations()
+        updateMemoryStats()
     }
     
     data class ConversationSummary(

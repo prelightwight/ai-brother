@@ -96,6 +96,9 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.0")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.0")
     implementation("androidx.fragment:fragment-ktx:1.6.1")
+    
+    // JSON serialization for conversation persistence
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

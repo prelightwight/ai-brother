@@ -28,10 +28,12 @@ class ChatFragment : Fragment() {
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var llamaInterface: LlamaInterface
     private lateinit var modelDownloader: ModelDownloader
+    private lateinit var conversationManager: ConversationManager
     
     private val messages = mutableListOf<ChatMessage>()
     private val handler = Handler(Looper.getMainLooper())
     private var isProcessing = false
+    private var currentConversationId = "default"
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,14 +51,17 @@ class ChatFragment : Fragment() {
         setupClickListeners()
         initializeAI()
         updateModelDisplay()
+        initializeConversationManager()
+        loadCurrentConversation()
         
-        // Welcome message - only add if no messages exist yet
+        // Welcome message - only add if no messages exist yet and no conversation history
         if (messages.isEmpty()) {
             addAiMessage("👋 Welcome to AI Brother! I'm your privacy-focused AI assistant.\n\n" +
                     "💡 To get started:\n" +
                     "1. Click 'Select Model' above to choose an AI model\n" +
                     "2. If no models are available, go to the Models tab to download one\n" +
-                    "3. Chat with real AI!")
+                    "3. Chat with real AI!\n\n" +
+                    "💬 Your conversations are automatically saved and can be viewed in the Brain tab.")
         }
     }
     
@@ -91,6 +96,12 @@ class ChatFragment : Fragment() {
         selectModelButton.setOnClickListener {
             showModelSelectionDialog()
         }
+        
+        // Long press on model selection area to show conversation options
+        selectModelButton.setOnLongClickListener {
+            showConversationMenu()
+            true
+        }
     }
     
     private fun initializeAI() {
@@ -109,6 +120,22 @@ class ChatFragment : Fragment() {
             } catch (e: Exception) {
                 updateMainActivityStatus("AI Error")
             }
+        }
+    }
+    
+    private fun initializeConversationManager() {
+        conversationManager = ConversationManager.getInstance(requireContext())
+        currentConversationId = conversationManager.getCurrentConversation().firstOrNull()?.conversationId ?: "default"
+    }
+    
+    private fun loadCurrentConversation() {
+        val savedMessages = conversationManager.getCurrentConversation()
+        messages.clear()
+        messages.addAll(savedMessages)
+        
+        if (messages.isNotEmpty()) {
+            chatAdapter.notifyDataSetChanged()
+            scrollToBottom()
         }
     }
     
@@ -232,6 +259,61 @@ class ChatFragment : Fragment() {
         updateModelDisplay()
     }
     
+    private fun showConversationMenu() {
+        val options = arrayOf(
+            "🆕 Start New Conversation",
+            "🧠 View All Conversations (Brain Tab)", 
+            "🗑️ Clear Current Conversation"
+        )
+        
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("Conversation Options")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> startNewConversation()
+                    1 -> switchToBrainTab()
+                    2 -> clearCurrentConversation()
+                }
+            }
+            .show()
+    }
+    
+    private fun startNewConversation() {
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("New Conversation")
+            .setMessage("Start a fresh conversation? Your current chat will be saved to memory.")
+            .setPositiveButton("Start New") { _, _ ->
+                currentConversationId = conversationManager.startNewConversation()
+                messages.clear()
+                chatAdapter.notifyDataSetChanged()
+                
+                // Add welcome message for new conversation
+                addAiMessage("🆕 Started a new conversation! What would you like to discuss?")
+                
+                Toast.makeText(requireContext(), "New conversation started!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun switchToBrainTab() {
+        val bottomNav = activity?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_navigation)
+        bottomNav?.selectedItemId = R.id.nav_brain
+    }
+    
+    private fun clearCurrentConversation() {
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("Clear Conversation")
+            .setMessage("Delete all messages in this conversation? This cannot be undone.")
+            .setPositiveButton("Clear") { _, _ ->
+                conversationManager.deleteConversation(currentConversationId)
+                startNewConversation()
+                Toast.makeText(requireContext(), "Conversation cleared!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
     private fun sendMessage() {
         if (isProcessing) return
         
@@ -346,14 +428,16 @@ You run locally on the user's device for privacy."""
     }
     
     private fun addUserMessage(content: String) {
-        val message = ChatMessage(content, true)
+        val message = ChatMessage(content, true, conversationId = currentConversationId)
         chatAdapter.addMessage(message)
+        conversationManager.addMessage(message)
         scrollToBottom()
     }
     
     private fun addAiMessage(content: String) {
-        val message = ChatMessage(content, false)
+        val message = ChatMessage(content, false, conversationId = currentConversationId)
         chatAdapter.addMessage(message)
+        conversationManager.addMessage(message)
         scrollToBottom()
     }
     

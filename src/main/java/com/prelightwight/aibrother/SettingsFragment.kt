@@ -253,8 +253,9 @@ class SettingsFragment : Fragment() {
                 .setTitle("Clear Chat History")
                 .setMessage("Are you sure you want to delete all chat messages? This action cannot be undone.")
                 .setPositiveButton("Clear") { _, _ ->
-                    // TODO: Implement chat clearing when chat persistence is added
-                    Toast.makeText(requireContext(), "Chat history cleared!", Toast.LENGTH_SHORT).show()
+                    val conversationManager = ConversationManager.getInstance(requireContext())
+                    conversationManager.clearAllConversations()
+                    Toast.makeText(requireContext(), "🧹 All chat history cleared!", Toast.LENGTH_SHORT).show()
                 }
                 .setNegativeButton("Cancel", null)
                 .show()

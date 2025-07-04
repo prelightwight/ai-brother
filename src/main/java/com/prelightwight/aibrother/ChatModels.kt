@@ -7,11 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-data class ChatMessage(
-    val content: String,
-    val isUser: Boolean,
-    val timestamp: Long = System.currentTimeMillis()
-)
+// ChatMessage is defined in ChatMessage.kt
 
 class ChatAdapter(private val messages: MutableList<ChatMessage>) : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
     
