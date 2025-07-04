@@ -9,8 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.prelightwight.aibrother.llm.LlamaInterface
+import kotlinx.coroutines.launch
 
 class ChatFragment : Fragment() {
     
@@ -18,43 +21,11 @@ class ChatFragment : Fragment() {
     private lateinit var messageInput: EditText
     private lateinit var sendButton: Button
     private lateinit var chatAdapter: ChatAdapter
+    private lateinit var llamaInterface: LlamaInterface
     
     private val messages = mutableListOf<ChatMessage>()
     private val handler = Handler(Looper.getMainLooper())
-    
-    // Enhanced AI responses based on input
-    private val aiResponses = mapOf(
-        "hello" to listOf(
-            "Hello! I'm AI Brother, your privacy-focused AI assistant. How can I help you today?",
-            "Hi there! It's great to chat with you. What would you like to talk about?",
-            "Hello! I'm here and ready to assist you with anything you need."
-        ),
-        "test" to listOf(
-            "Everything is working perfectly! 🚀 The chat interface is fully functional.",
-            "Test successful! All systems are operational and ready for conversation.",
-            "✅ Chat functionality confirmed! I can understand and respond to your messages."
-        ),
-        "navigation" to listOf(
-            "Great! You can now navigate between different sections using the bottom tabs! Try tapping Brain, Files, Images, or Settings to explore the app.",
-            "The navigation is working perfectly! Each tab will have its own unique features. We're building this step by step.",
-            "🎯 Navigation test successful! You can now access multiple screens and features through the bottom menu."
-        ),
-        "how are you" to listOf(
-            "I'm doing great! All my systems are running smoothly and I'm excited to chat with you.",
-            "I'm wonderful! Thanks for asking. How are you doing today?",
-            "I'm functioning perfectly and feeling very chatty! How can I help you?"
-        ),
-        "thank you" to listOf(
-            "You're very welcome! I'm always happy to help.",
-            "My pleasure! Feel free to ask me anything else.",
-            "You're welcome! Is there anything else I can assist you with?"
-        ),
-        "features" to listOf(
-            "I'm designed to be your comprehensive AI assistant! I can chat, help with tasks, and keep conversations private.",
-            "My features include intelligent conversation, privacy-focused design, and the ability to help with various tasks.",
-            "I offer smart conversation capabilities, local processing for privacy, and I'm constantly learning to be more helpful!"
-        )
-    )
+    private var isProcessing = false
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,10 +41,15 @@ class ChatFragment : Fragment() {
         initializeViews(view)
         setupRecyclerView()
         setupClickListeners()
+        initializeAI()
         
         // Welcome message - only add if no messages exist yet
         if (messages.isEmpty()) {
-            addAiMessage("👋 Welcome to AI Brother! I'm your privacy-focused AI assistant. Try typing 'navigation' to test the new interface!")
+            addAiMessage("👋 Welcome to AI Brother! I'm your privacy-focused AI assistant.\n\n" +
+                    "💡 To get started:\n" +
+                    "1. Go to the Models tab\n" +
+                    "2. Download a model (try TinyLlama for quick testing)\n" +
+                    "3. Come back and chat with real AI!")
         }
     }
     
@@ -102,24 +78,120 @@ class ChatFragment : Fragment() {
         }
     }
     
+    private fun initializeAI() {
+        llamaInterface = LlamaInterface.getInstance()
+        
+        // Initialize the backend in background
+        lifecycleScope.launch {
+            try {
+                val initialized = llamaInterface.initialize()
+                if (initialized) {
+                    updateMainActivityStatus("AI Ready")
+                } else {
+                    updateMainActivityStatus("AI Init Failed")
+                }
+            } catch (e: Exception) {
+                updateMainActivityStatus("AI Error")
+            }
+        }
+    }
+    
     private fun sendMessage() {
+        if (isProcessing) return
+        
         val message = messageInput.text.toString().trim()
         if (message.isEmpty()) return
         
         // Add user message
         addUserMessage(message)
         messageInput.text.clear()
+        isProcessing = true
         
-        // Update main activity status
-        updateMainActivityStatus("AI is typing...")
+        // Update status and generate response
+        updateMainActivityStatus("AI is thinking...")
         
-        // Generate AI response after a delay based on settings
-        val responseDelay = getResponseSpeedFromSettings()
-        handler.postDelayed({
-            val aiResponse = generateAiResponse(message)
-            addAiMessage(aiResponse)
-            updateMainActivityStatus("Ready")
-        }, responseDelay)
+        lifecycleScope.launch {
+            try {
+                val response = if (llamaInterface.isModelLoaded()) {
+                    // Use real AI
+                    generateRealAiResponse(message)
+                } else {
+                    // Use enhanced fallback
+                    generateEnhancedFallbackResponse(message)
+                }
+                
+                // Add AI response on main thread
+                handler.post {
+                    addAiMessage(response)
+                    updateMainActivityStatus("Ready")
+                    isProcessing = false
+                }
+                
+            } catch (e: Exception) {
+                // Error handling
+                handler.post {
+                    addAiMessage("Sorry, I encountered an error: ${e.message}")
+                    updateMainActivityStatus("Error")
+                    isProcessing = false
+                }
+            }
+        }
+    }
+    
+    private suspend fun generateRealAiResponse(userMessage: String): String {
+        return try {
+            val systemPrompt = buildSystemPrompt()
+            llamaInterface.generateChatResponse(userMessage, systemPrompt)
+        } catch (e: Exception) {
+            "I'm having trouble generating a response right now: ${e.message}"
+        }
+    }
+    
+    private fun buildSystemPrompt(): String {
+        val responseStyle = getResponseStyleFromSettings()
+        val creativity = getCreativityFromSettings()
+        
+        val styleInstructions = when (responseStyle) {
+            0 -> "Be friendly, conversational, and warm in your responses."
+            1 -> "Respond in a professional, formal manner."
+            2 -> "Be creative, playful, and use emojis occasionally."
+            3 -> "Keep responses concise and direct."
+            4 -> "Provide detailed, explanatory responses."
+            else -> "Be helpful and natural in your responses."
+        }
+        
+        val creativityInstructions = when {
+            creativity < 25 -> "Be very factual and straightforward."
+            creativity < 50 -> "Be somewhat creative but mostly factual."
+            creativity < 75 -> "Balance creativity with factual information."
+            else -> "Be creative and imaginative in your responses."
+        }
+        
+        return """You are AI Brother, a helpful and privacy-focused AI assistant. 
+$styleInstructions $creativityInstructions 
+Keep responses reasonably concise unless specifically asked for detail. 
+You run locally on the user's device for privacy."""
+    }
+    
+    private fun generateEnhancedFallbackResponse(userMessage: String): String {
+        val lowercaseMessage = userMessage.lowercase()
+        
+        // Special responses for common queries when AI is not loaded
+        return when {
+            lowercaseMessage.contains("hello") || lowercaseMessage.contains("hi") -> 
+                "Hello! 👋 I'd love to chat properly, but I need you to load an AI model first. Head to the Models tab to download one!"
+                
+            lowercaseMessage.contains("test") -> 
+                "The chat interface is working perfectly! 🚀 But for real AI responses, please download and load a model from the Models tab."
+                
+            lowercaseMessage.contains("help") -> 
+                "I'm here to help! 💪 To unlock my full AI capabilities:\n1. Go to Models tab\n2. Download a model (TinyLlama is great for testing)\n3. Load it\n4. Come back and chat with real AI!"
+                
+            lowercaseMessage.contains("model") -> 
+                "You're asking about models! 🧠 Perfect timing - you'll need to load one for AI chat. Check the Models tab to see available downloads."
+                
+            else -> "I need an AI model to be loaded before I can chat intelligently. Please go to the Models tab, download a model (I recommend TinyLlama for testing), and load it!"
+        }
     }
     
     private fun updateMainActivityStatus(status: String) {
@@ -144,104 +216,6 @@ class ChatFragment : Fragment() {
         }
     }
     
-    private fun generateAiResponse(userMessage: String): String {
-        val lowercaseMessage = userMessage.lowercase()
-        
-        // Look for keywords in the user message
-        for ((keyword, responses) in aiResponses) {
-            if (lowercaseMessage.contains(keyword)) {
-                return responses.random()
-            }
-        }
-        
-        // Check if user is asking about settings
-        if (lowercaseMessage.contains("settings") || lowercaseMessage.contains("configuration")) {
-            return "I can see you're interested in my settings! Head over to the Settings tab to customize my behavior, response style, and privacy preferences. You can adjust my creativity level, response speed, and much more!"
-        }
-        
-        // Generate response based on current settings
-        val responseStyle = getResponseStyleFromSettings()
-        val creativity = getCreativityFromSettings()
-        val memoryEnabled = isMemoryEnabledFromSettings()
-        
-        // Base responses categorized by style
-        val baseResponses = when (responseStyle) {
-            0 -> listOf( // Friendly & Conversational
-                "That's really interesting! I'd love to hear more about your thoughts on this.",
-                "I enjoy chatting with you! Could you tell me more about that?",
-                "That's a great point! What's your take on this topic?",
-                "I appreciate you sharing that with me. What else would you like to explore?",
-                "Your message got me thinking! How can I help you with this?"
-            )
-            1 -> listOf( // Professional & Formal
-                "I understand your inquiry. Could you provide additional details?",
-                "Thank you for your message. I would be happy to assist you further.",
-                "I acknowledge your input. Please let me know how I may be of service.",
-                "Your request has been noted. How may I best address your needs?",
-                "I am ready to provide assistance. What specific information do you require?"
-            )
-            2 -> listOf( // Creative & Playful
-                "Ooh, that's fascinating! 🤔 Tell me more - I'm all ears!",
-                "What a delightful thought! 🌟 Let's dive deeper into this together!",
-                "That's got my creative gears turning! ⚙️ What's your next idea?",
-                "I love where this conversation is going! 🚀 Keep the thoughts coming!",
-                "Your mind works in wonderful ways! ✨ What else is sparking your curiosity?"
-            )
-            3 -> listOf( // Concise & Direct  
-                "Understood. More details?",
-                "Got it. What's next?",
-                "Clear. How can I help?",
-                "Noted. Continue.",
-                "Right. What do you need?"
-            )
-            4 -> listOf( // Detailed & Explanatory
-                "That's a compelling observation that touches on several important aspects. I'd like to understand the nuances of your perspective better. Could you elaborate on the specific elements that interest you most? This will help me provide more targeted and useful insights.",
-                "Your message raises intriguing questions that merit careful consideration. There are multiple dimensions to explore here, and I'm curious about which particular angle resonates most strongly with you. What aspects would you like to examine in greater detail?",
-                "I find your input quite thought-provoking, as it encompasses various interconnected concepts. To provide the most comprehensive and helpful response, I'd benefit from understanding your specific goals and interests related to this topic. What would be most valuable for you to discuss?",
-                "Thank you for sharing such an engaging topic. The complexity and depth of what you've mentioned suggests there are numerous pathways we could explore together. I'm here to assist you in whichever direction would be most beneficial for your particular needs and curiosities."
-            )
-            else -> listOf( // Default fallback
-                "That's interesting! Tell me more.",
-                "I'd love to hear your thoughts on this.",
-                "What would you like to explore further?"
-            )
-        }
-        
-        var response = baseResponses.random()
-        
-        // Add creativity variations based on creativity level
-        if (creativity > 75) {
-            val creativeAdditions = listOf(
-                " 🎨", " ✨", " 🌟", " 💫", " 🚀"
-            )
-            response += creativeAdditions.random()
-        }
-        
-        // Add memory reference if enabled
-        if (memoryEnabled && Math.random() < 0.3) { // 30% chance
-            val memoryAdditions = listOf(
-                " (I'll remember this for our future conversations!)",
-                " (Adding this to my memory for next time!)",
-                " (I'm learning from our chat!)"
-            )
-            response += memoryAdditions.random()
-        }
-        
-        return response
-    }
-    
-    private fun getResponseSpeedFromSettings(): Long {
-        val sharedPrefs = requireContext().getSharedPreferences(SettingsFragment.PREFS_NAME, Context.MODE_PRIVATE)
-        val speed = sharedPrefs.getInt(SettingsFragment.PREF_RESPONSE_SPEED, 60)
-        
-        return when {
-            speed < 25 -> 3000L + (Math.random() * 1000).toLong()    // Very slow: 3-4 seconds
-            speed < 50 -> 2000L + (Math.random() * 1000).toLong()    // Slow: 2-3 seconds  
-            speed < 75 -> 1000L + (Math.random() * 500).toLong()     // Normal: 1-1.5 seconds
-            else -> 300L + (Math.random() * 400).toLong()            // Fast: 0.3-0.7 seconds
-        }
-    }
-    
     private fun getCreativityFromSettings(): Int {
         val sharedPrefs = requireContext().getSharedPreferences(SettingsFragment.PREFS_NAME, Context.MODE_PRIVATE)
         return sharedPrefs.getInt(SettingsFragment.PREF_CREATIVITY, 75)
@@ -252,8 +226,16 @@ class ChatFragment : Fragment() {
         return sharedPrefs.getInt(SettingsFragment.PREF_RESPONSE_STYLE, 0)
     }
     
-    private fun isMemoryEnabledFromSettings(): Boolean {
-        val sharedPrefs = requireContext().getSharedPreferences(SettingsFragment.PREFS_NAME, Context.MODE_PRIVATE)
-        return sharedPrefs.getBoolean(SettingsFragment.PREF_MEMORY_ENABLED, true)
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean up AI resources if needed
+        lifecycleScope.launch {
+            try {
+                // Don't shutdown completely as other fragments might use it
+                // llamaInterface.shutdown() 
+            } catch (e: Exception) {
+                // Ignore cleanup errors
+            }
+        }
     }
 }

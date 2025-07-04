@@ -60,6 +60,7 @@ id conversations_list
 id creativity_seekbar
 id creativity_value
 id dark_theme_switch
+id downloadProgress
 id export_data_button
 id files_list
 id font_size_seekbar
@@ -73,12 +74,18 @@ id memory_status_text
 id memory_switch
 id message_input
 id messages_recycler
+id modelActionButton
+id modelDescription
+id modelDetails
+id modelName
+id modelsListView
 id nav_brain
 id nav_chat
 id nav_files
 id nav_graph
 id nav_host_fragment
 id nav_images
+id nav_models
 id nav_settings
 id notifications_switch
 id ocr_status_text
@@ -87,6 +94,9 @@ id placeholder_button
 id placeholder_description
 id placeholder_icon
 id placeholder_title
+id progressText
+id recommendedBadge
+id refreshButton
 id replay_tutorial_button
 id reset_settings_button
 id response_speed_seekbar
@@ -95,6 +105,7 @@ id response_style_spinner
 id rounded_bubbles_switch
 id send_button
 id status_text
+id storageInfoText
 id storage_used_text
 id test_settings_button
 id upload_count_text
@@ -105,9 +116,11 @@ layout fragment_brain
 layout fragment_chat
 layout fragment_files
 layout fragment_images
+layout fragment_models
 layout fragment_placeholder
 layout fragment_settings
 layout item_message
+layout item_model
 menu bottom_nav_menu
 mipmap ic_launcher
 navigation nav_graph

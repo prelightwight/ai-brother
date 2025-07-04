@@ -3262,6 +3262,7 @@ id disableIntraAutoTransition
 id disablePostScroll
 id disableScroll
 id disjoint
+id downloadProgress
 id dragAnticlockwise
 id dragClockwise
 id dragDown
@@ -3387,6 +3388,11 @@ id message_input
 id messages_recycler
 id middle
 id mini
+id modelActionButton
+id modelDescription
+id modelDetails
+id modelName
+id modelsListView
 id month_grid
 id month_navigation_bar
 id month_navigation_fragment_toggle
@@ -3426,6 +3432,7 @@ id nav_graph
 id nav_host_fragment
 id nav_host_fragment_container
 id nav_images
+id nav_models
 id nav_settings
 id navigation_bar_item_active_indicator_view
 id navigation_bar_item_icon_container
@@ -3474,11 +3481,14 @@ id pooling_container_listener_holder_tag
 id position
 id postLayout
 id pressed
+id progressText
 id progress_circular
 id progress_horizontal
 id radio
 id ratio
+id recommendedBadge
 id rectangles
+id refreshButton
 id replay_tutorial_button
 id report_drawn
 id reset_settings_button
@@ -3569,6 +3579,7 @@ id staticLayout
 id staticPostLayout
 id status_text
 id stop
+id storageInfoText
 id storage_used_text
 id stretch
 id submenuarrow
@@ -3782,9 +3793,11 @@ layout fragment_brain
 layout fragment_chat
 layout fragment_files
 layout fragment_images
+layout fragment_models
 layout fragment_placeholder
 layout fragment_settings
 layout item_message
+layout item_model
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title
