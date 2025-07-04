@@ -1,20 +1,20 @@
 -- Merging decision tree log ---
 provider#androidx.core.content.FileProvider
-INJECTED from /workspace/AndroidManifest.xml:36:9-44:20
+INJECTED from /workspace/src/main/AndroidManifest.xml:35:9-43:20
 	android:grantUriPermissions
-		ADDED from /workspace/AndroidManifest.xml:40:13-47
+		ADDED from /workspace/src/main/AndroidManifest.xml:39:13-47
 	android:authorities
-		INJECTED from /workspace/AndroidManifest.xml
-		ADDED from /workspace/AndroidManifest.xml:38:13-64
+		INJECTED from /workspace/src/main/AndroidManifest.xml
+		ADDED from /workspace/src/main/AndroidManifest.xml:37:13-64
 	android:exported
-		ADDED from /workspace/AndroidManifest.xml:39:13-37
+		ADDED from /workspace/src/main/AndroidManifest.xml:38:13-37
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:37:13-62
+		ADDED from /workspace/src/main/AndroidManifest.xml:36:13-62
 manifest
-ADDED from /workspace/AndroidManifest.xml:1:1-47:12
-INJECTED from /workspace/AndroidManifest.xml:1:1-47:12
-INJECTED from /workspace/AndroidManifest.xml:1:1-47:12
-INJECTED from /workspace/AndroidManifest.xml:1:1-47:12
+ADDED from /workspace/src/main/AndroidManifest.xml:1:1-46:12
+INJECTED from /workspace/src/main/AndroidManifest.xml:1:1-46:12
+INJECTED from /workspace/src/main/AndroidManifest.xml:1:1-46:12
+INJECTED from /workspace/src/main/AndroidManifest.xml:1:1-46:12
 MERGED from [androidx.work:work-runtime-ktx:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/8b38f5ef63e8a3789d30de13b2bb9fcc/transformed/work-runtime-ktx-2.9.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/c635128e2ebb0f9f63a1f76017070848/transformed/work-runtime-2.9.0/AndroidManifest.xml:17:1-145:12
 MERGED from [androidx.navigation:navigation-common:2.7.7] /home/ubuntu/.gradle/caches/transforms-3/212af2b8d56b9610134f702ea94c9476/transformed/navigation-common-2.7.7/AndroidManifest.xml:17:1-22:12
@@ -77,63 +77,62 @@ MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] /home/ubuntu/.gra
 MERGED from [androidx.startup:startup-runtime:1.1.1] /home/ubuntu/.gradle/caches/transforms-3/39ca18a123476b17ffb2bde38acb4b38/transformed/startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
 MERGED from [androidx.tracing:tracing:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/0882814fd8e7398ffceff9e87fba5935/transformed/tracing-1.0.0/AndroidManifest.xml:17:1-24:12
 	package
-		ADDED from /workspace/AndroidManifest.xml:2:5-42
-		INJECTED from /workspace/AndroidManifest.xml
+		INJECTED from /workspace/src/main/AndroidManifest.xml
 	android:versionName
-		INJECTED from /workspace/AndroidManifest.xml
+		INJECTED from /workspace/src/main/AndroidManifest.xml
 	android:versionCode
-		INJECTED from /workspace/AndroidManifest.xml
+		INJECTED from /workspace/src/main/AndroidManifest.xml
 	xmlns:android
-		ADDED from /workspace/AndroidManifest.xml:1:11-69
+		ADDED from /workspace/src/main/AndroidManifest.xml:1:11-69
 uses-permission#android.permission.READ_EXTERNAL_STORAGE
-ADDED from /workspace/AndroidManifest.xml:5:5-80
+ADDED from /workspace/src/main/AndroidManifest.xml:4:5-80
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:5:22-77
+		ADDED from /workspace/src/main/AndroidManifest.xml:4:22-77
 uses-permission#android.permission.CAMERA
-ADDED from /workspace/AndroidManifest.xml:6:5-65
+ADDED from /workspace/src/main/AndroidManifest.xml:5:5-65
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:6:22-62
+		ADDED from /workspace/src/main/AndroidManifest.xml:5:22-62
 uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
-ADDED from /workspace/AndroidManifest.xml:7:5-108
+ADDED from /workspace/src/main/AndroidManifest.xml:6:5-108
 	android:maxSdkVersion
-		ADDED from /workspace/AndroidManifest.xml:7:79-105
+		ADDED from /workspace/src/main/AndroidManifest.xml:6:79-105
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:7:22-78
+		ADDED from /workspace/src/main/AndroidManifest.xml:6:22-78
 uses-permission#android.permission.INTERNET
-ADDED from /workspace/AndroidManifest.xml:10:5-67
+ADDED from /workspace/src/main/AndroidManifest.xml:9:5-67
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:10:22-64
+		ADDED from /workspace/src/main/AndroidManifest.xml:9:22-64
 uses-permission#android.permission.ACCESS_NETWORK_STATE
-ADDED from /workspace/AndroidManifest.xml:11:5-79
+ADDED from /workspace/src/main/AndroidManifest.xml:10:5-79
 MERGED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/c635128e2ebb0f9f63a1f76017070848/transformed/work-runtime-2.9.0/AndroidManifest.xml:24:5-79
 MERGED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/c635128e2ebb0f9f63a1f76017070848/transformed/work-runtime-2.9.0/AndroidManifest.xml:24:5-79
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:11:22-76
+		ADDED from /workspace/src/main/AndroidManifest.xml:10:22-76
 uses-permission#android.permission.MANAGE_EXTERNAL_STORAGE
-ADDED from /workspace/AndroidManifest.xml:14:5-15:38
+ADDED from /workspace/src/main/AndroidManifest.xml:13:5-14:38
 	android:minSdkVersion
-		ADDED from /workspace/AndroidManifest.xml:15:9-35
+		ADDED from /workspace/src/main/AndroidManifest.xml:14:9-35
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:14:22-79
+		ADDED from /workspace/src/main/AndroidManifest.xml:13:22-79
 uses-permission#android.permission.REQUEST_INSTALL_PACKAGES
-ADDED from /workspace/AndroidManifest.xml:16:5-83
+ADDED from /workspace/src/main/AndroidManifest.xml:15:5-83
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:16:22-80
+		ADDED from /workspace/src/main/AndroidManifest.xml:15:22-80
 uses-feature#android.hardware.camera
-ADDED from /workspace/AndroidManifest.xml:19:5-85
+ADDED from /workspace/src/main/AndroidManifest.xml:18:5-85
 	android:required
-		ADDED from /workspace/AndroidManifest.xml:19:58-82
+		ADDED from /workspace/src/main/AndroidManifest.xml:18:58-82
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:19:19-57
+		ADDED from /workspace/src/main/AndroidManifest.xml:18:19-57
 uses-feature#android.hardware.camera.autofocus
-ADDED from /workspace/AndroidManifest.xml:20:5-95
+ADDED from /workspace/src/main/AndroidManifest.xml:19:5-95
 	android:required
-		ADDED from /workspace/AndroidManifest.xml:20:68-92
+		ADDED from /workspace/src/main/AndroidManifest.xml:19:68-92
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:20:19-67
+		ADDED from /workspace/src/main/AndroidManifest.xml:19:19-67
 application
-ADDED from /workspace/AndroidManifest.xml:22:5-45:19
-INJECTED from /workspace/AndroidManifest.xml:22:5-45:19
+ADDED from /workspace/src/main/AndroidManifest.xml:21:5-44:19
+INJECTED from /workspace/src/main/AndroidManifest.xml:21:5-44:19
 MERGED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/c635128e2ebb0f9f63a1f76017070848/transformed/work-runtime-2.9.0/AndroidManifest.xml:28:5-143:19
 MERGED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/c635128e2ebb0f9f63a1f76017070848/transformed/work-runtime-2.9.0/AndroidManifest.xml:28:5-143:19
 MERGED from [androidx.compose.ui:ui-test-manifest:1.6.4] /home/ubuntu/.gradle/caches/transforms-3/ae7aaf0f77a87246319f56eb9846d504/transformed/ui-test-manifest-1.6.4/AndroidManifest.xml:22:5-26:19
@@ -155,41 +154,41 @@ MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] /home/ubuntu/.gra
 MERGED from [androidx.startup:startup-runtime:1.1.1] /home/ubuntu/.gradle/caches/transforms-3/39ca18a123476b17ffb2bde38acb4b38/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
 MERGED from [androidx.startup:startup-runtime:1.1.1] /home/ubuntu/.gradle/caches/transforms-3/39ca18a123476b17ffb2bde38acb4b38/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
 	android:extractNativeLibs
-		INJECTED from /workspace/AndroidManifest.xml
+		INJECTED from /workspace/src/main/AndroidManifest.xml
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.12.0] /home/ubuntu/.gradle/caches/transforms-3/4e116a93cb58fedfe700f980927d2f70/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
 	android:label
-		ADDED from /workspace/AndroidManifest.xml:23:9-41
+		ADDED from /workspace/src/main/AndroidManifest.xml:22:9-41
 	android:icon
-		ADDED from /workspace/AndroidManifest.xml:24:9-43
+		ADDED from /workspace/src/main/AndroidManifest.xml:23:9-43
 	android:theme
-		ADDED from /workspace/AndroidManifest.xml:25:9-47
+		ADDED from /workspace/src/main/AndroidManifest.xml:24:9-47
 activity#com.prelightwight.aibrother.MainActivity
-ADDED from /workspace/AndroidManifest.xml:26:9-33:20
+ADDED from /workspace/src/main/AndroidManifest.xml:25:9-32:20
 	android:exported
-		ADDED from /workspace/AndroidManifest.xml:28:13-36
+		ADDED from /workspace/src/main/AndroidManifest.xml:27:13-36
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:27:13-41
+		ADDED from /workspace/src/main/AndroidManifest.xml:26:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /workspace/AndroidManifest.xml:29:13-32:29
+ADDED from /workspace/src/main/AndroidManifest.xml:28:13-31:29
 action#android.intent.action.MAIN
-ADDED from /workspace/AndroidManifest.xml:30:17-69
+ADDED from /workspace/src/main/AndroidManifest.xml:29:17-69
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:30:25-66
+		ADDED from /workspace/src/main/AndroidManifest.xml:29:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /workspace/AndroidManifest.xml:31:17-77
+ADDED from /workspace/src/main/AndroidManifest.xml:30:17-77
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:31:27-74
+		ADDED from /workspace/src/main/AndroidManifest.xml:30:27-74
 meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from /workspace/AndroidManifest.xml:41:13-43:54
+ADDED from /workspace/src/main/AndroidManifest.xml:40:13-42:54
 	android:resource
-		ADDED from /workspace/AndroidManifest.xml:43:17-51
+		ADDED from /workspace/src/main/AndroidManifest.xml:42:17-51
 	android:name
-		ADDED from /workspace/AndroidManifest.xml:42:17-67
+		ADDED from /workspace/src/main/AndroidManifest.xml:41:17-67
 uses-sdk
-INJECTED from /workspace/AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from /workspace/AndroidManifest.xml
-INJECTED from /workspace/AndroidManifest.xml
+INJECTED from /workspace/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /workspace/src/main/AndroidManifest.xml
+INJECTED from /workspace/src/main/AndroidManifest.xml
 MERGED from [androidx.work:work-runtime-ktx:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/8b38f5ef63e8a3789d30de13b2bb9fcc/transformed/work-runtime-ktx-2.9.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.work:work-runtime-ktx:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/8b38f5ef63e8a3789d30de13b2bb9fcc/transformed/work-runtime-ktx-2.9.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/c635128e2ebb0f9f63a1f76017070848/transformed/work-runtime-2.9.0/AndroidManifest.xml:21:5-44
@@ -313,9 +312,9 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /home/ubuntu/.gradle/caches
 MERGED from [androidx.tracing:tracing:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/0882814fd8e7398ffceff9e87fba5935/transformed/tracing-1.0.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.tracing:tracing:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/0882814fd8e7398ffceff9e87fba5935/transformed/tracing-1.0.0/AndroidManifest.xml:20:5-22:41
 	android:targetSdkVersion
-		INJECTED from /workspace/AndroidManifest.xml
+		INJECTED from /workspace/src/main/AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from /workspace/AndroidManifest.xml
+		INJECTED from /workspace/src/main/AndroidManifest.xml
 uses-permission#android.permission.WAKE_LOCK
 ADDED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/c635128e2ebb0f9f63a1f76017070848/transformed/work-runtime-2.9.0/AndroidManifest.xml:23:5-68
 	android:name
