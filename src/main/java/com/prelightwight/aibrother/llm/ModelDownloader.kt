@@ -58,7 +58,7 @@ class ModelDownloader(private val context: Context) {
         return listOf(
             ModelInfo(
                 name = "tinyllama",
-                displayName = "TinyLlama 1.1B",
+                displayName = "TinyLlama 1.1B Chat",
                 description = "Ultra-fast, lightweight model perfect for testing and quick responses",
                 downloadUrl = "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.q4_k_m.gguf",
                 fileName = "tinyllama-1.1b-chat-v1.0.q4_k_m.gguf",
@@ -69,8 +69,8 @@ class ModelDownloader(private val context: Context) {
             ),
             ModelInfo(
                 name = "phi3-mini",
-                displayName = "Phi-3 Mini",
-                description = "Microsoft's powerful small model, excellent for general conversation",
+                displayName = "Phi-3 Mini 3.8B",
+                description = "Microsoft's compact yet powerful model, excellent for mobile devices",
                 downloadUrl = "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf",
                 fileName = "Phi-3-mini-4k-instruct-q4.gguf",
                 estimatedSizeMB = 2200,
@@ -80,10 +80,10 @@ class ModelDownloader(private val context: Context) {
             ),
             ModelInfo(
                 name = "gemma2-2b",
-                displayName = "Gemma 2 2B",
-                description = "Google's latest Gemma model, great balance of size and capability",
-                downloadUrl = "https://huggingface.co/bartowski/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it-Q4_K_M.gguf",
-                fileName = "gemma-2-2b-it-Q4_K_M.gguf",
+                displayName = "Gemma 2 2B Instruct",
+                description = "Google's latest small model with excellent instruction following",
+                downloadUrl = "https://huggingface.co/QuantFactory/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it.Q4_K_M.gguf",
+                fileName = "gemma-2-2b-it.Q4_K_M.gguf",
                 estimatedSizeMB = 1600,
                 quantization = "Q4_K_M",
                 parameters = "2B",
@@ -91,9 +91,9 @@ class ModelDownloader(private val context: Context) {
             ),
             ModelInfo(
                 name = "llama3.2-1b",
-                displayName = "Llama 3.2 1B",
-                description = "Meta's latest compact model with excellent performance",
-                downloadUrl = "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+                displayName = "Llama 3.2 1B Instruct",
+                description = "Meta's newest ultra-compact model with impressive capabilities",
+                downloadUrl = "https://huggingface.co/huggingface/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
                 fileName = "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
                 estimatedSizeMB = 800,
                 quantization = "Q4_K_M",
@@ -101,14 +101,25 @@ class ModelDownloader(private val context: Context) {
                 isRecommended = false
             ),
             ModelInfo(
-                name = "qwen2-1.5b",
-                displayName = "Qwen2 1.5B",
-                description = "Alibaba's efficient multilingual model",
-                downloadUrl = "https://huggingface.co/Qwen/Qwen2-1.5B-Instruct-GGUF/resolve/main/qwen2-1_5b-instruct-q4_k_m.gguf",
-                fileName = "qwen2-1_5b-instruct-q4_k_m.gguf",
-                estimatedSizeMB = 950,
+                name = "qwen2-0.5b",
+                displayName = "Qwen2 0.5B Instruct",
+                description = "Alibaba's tiny but capable multilingual model",
+                downloadUrl = "https://huggingface.co/Qwen/Qwen2-0.5B-Instruct-GGUF/resolve/main/qwen2-0_5b-instruct-q4_k_m.gguf",
+                fileName = "qwen2-0_5b-instruct-q4_k_m.gguf",
+                estimatedSizeMB = 350,
                 quantization = "Q4_K_M",
-                parameters = "1.5B",
+                parameters = "0.5B",
+                isRecommended = false
+            ),
+            ModelInfo(
+                name = "smollm",
+                displayName = "SmolLM 1.7B Instruct",
+                description = "HuggingFace's efficient small language model",
+                downloadUrl = "https://huggingface.co/HuggingFaceTB/SmolLM-1.7B-Instruct-GGUF/resolve/main/SmolLM-1.7B-Instruct-Q4_K_M.gguf",
+                fileName = "SmolLM-1.7B-Instruct-Q4_K_M.gguf",
+                estimatedSizeMB = 1000,
+                quantization = "Q4_K_M",
+                parameters = "1.7B",
                 isRecommended = false
             )
         )

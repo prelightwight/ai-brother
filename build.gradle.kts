@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.prelightwight.aibrother"
-        minSdk = 21
+        minSdk = 26  // Updated for POI libraries compatibility
         targetSdk = 28
         versionCode = 4  // Updated version
         versionName = "1.1.0"
@@ -21,13 +21,13 @@ android {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
         
-        // Enable native build with llama.cpp integration
-        externalNativeBuild {
-            cmake {
-                cppFlags += listOf("-std=c++17", "-frtti", "-fexceptions")
-                abiFilters += listOf("arm64-v8a")
-            }
-        }
+        // Enable native build with llama.cpp integration - temporarily disabled
+        // externalNativeBuild {
+        //     cmake {
+        //         cppFlags += listOf("-std=c++17", "-frtti", "-fexceptions")
+        //         abiFilters += listOf("arm64-v8a")
+        //     }
+        // }
     }
 
     buildTypes {
@@ -58,13 +58,12 @@ android {
         viewBinding = true  // Use view binding instead of Compose
     }
 
-    // Enable native build configuration for llama.cpp
-    externalNativeBuild {
-        cmake {
-            path = file("CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
+    // Enable native build configuration for llama.cpp - temporarily disabled
+    // externalNativeBuild {
+    //     cmake {
+    //         path = file("CMakeLists.txt")
+    //     }
+    // }
 
     packaging {
         resources {
@@ -99,6 +98,28 @@ dependencies {
     
     // JSON serialization for conversation persistence
     implementation("com.google.code.gson:gson:2.10.1")
+    
+    // File handling and document processing
+    implementation("androidx.activity:activity-ktx:1.8.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
+    
+    // Permissions handling
+    implementation("androidx.core:core:1.12.0")
+    
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    
+    // Document processing libraries
+    implementation("org.apache.poi:poi:5.2.4")
+    implementation("org.apache.poi:poi-ooxml:5.2.4")
+    implementation("org.apache.poi:poi-scratchpad:5.2.4")
+    
+    // PDF processing
+    implementation("com.itextpdf:itext7-core:7.2.5")
+    
+    // Image processing
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
