@@ -97,8 +97,15 @@ class FilesFragment : Fragment() {
     
     private fun setupButtons() {
         uploadFileBtn.setOnClickListener {
-            // Simplified approach - directly open file picker
+            // Try the dialog first, but also add a direct option
             showFileUploadOptions()
+        }
+        
+        // Add long-click for direct file picker bypass
+        uploadFileBtn.setOnLongClickListener {
+            Toast.makeText(requireContext(), "Opening file picker directly...", Toast.LENGTH_SHORT).show()
+            openFilePicker("any")
+            true
         }
         
         analyzeAllBtn.setOnClickListener {
@@ -121,27 +128,49 @@ class FilesFragment : Fragment() {
     }
     
     private fun showFileUploadOptions() {
-        val fileTypes = arrayOf(
-            "📄 Documents (PDF, Word, Text)",
-            "📊 Spreadsheets (Excel, CSV)", 
-            "🖼️ Images (JPG, PNG)",
-            "📁 Multiple Files",
-            "📱 Any File Type"
-        )
-        
-        AlertDialog.Builder(requireContext())
-            .setTitle("Upload Files")
-            .setMessage("What type of file would you like to upload?")
-            .setItems(fileTypes) { _, which ->
-                when (which) {
-                    0 -> openFilePicker("documents")
-                    1 -> openFilePicker("spreadsheets") 
-                    2 -> openFilePicker("images")
-                    3 -> openFilePicker("multiple")
-                    4 -> openFilePicker("any")
+        try {
+            val fileTypes = arrayOf(
+                "📄 Documents (PDF, Word, Text)",
+                "📊 Spreadsheets (Excel, CSV)", 
+                "🖼️ Images (JPG, PNG)",
+                "📁 Multiple Files",
+                "📱 Any File Type"
+            )
+            
+            // Try a different approach with multiple dialogs instead of setItems
+            AlertDialog.Builder(requireContext())
+                .setTitle("Upload Files")
+                .setMessage("What type of file would you like to upload?\n\nTip: Long-press 'Upload File' button for direct access")
+                .setPositiveButton("📄 Documents") { _, _ ->
+                    openFilePicker("documents")
                 }
+                .setNeutralButton("📱 Any File") { _, _ ->
+                    openFilePicker("any")
+                }
+                .setNegativeButton("More Options") { _, _ ->
+                    showMoreFileOptions()
+                }
+                .show()
+            
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Error creating dialog: ${e.message}", Toast.LENGTH_LONG).show()
+            // Fallback: directly open any file picker
+            openFilePicker("any")
+        }
+    }
+    
+    private fun showMoreFileOptions() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("More File Types")
+            .setPositiveButton("📊 Spreadsheets") { _, _ ->
+                openFilePicker("spreadsheets")
             }
-            .setNegativeButton("Cancel", null)
+            .setNeutralButton("🖼️ Images") { _, _ ->
+                openFilePicker("images")
+            }
+            .setNegativeButton("📁 Multiple Files") { _, _ ->
+                openFilePicker("multiple")
+            }
             .show()
     }
     
