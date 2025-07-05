@@ -253,8 +253,18 @@ class FilesFragment : Fragment() {
                 setupFilesList()
                 updateFileStats()
                 
-                // Start analysis
-                analyzeFile(fileInfo)
+                // Check auto-analysis setting before starting analysis
+                val sharedPrefs = requireContext().getSharedPreferences("file_settings", Context.MODE_PRIVATE)
+                val autoAnalysisEnabled = sharedPrefs.getBoolean("auto_analysis_enabled", true)
+                
+                if (autoAnalysisEnabled) {
+                    analyzeFile(fileInfo)
+                } else {
+                    fileInfo.status = "📁 Ready for analysis"
+                    fileInfo.summary = "File uploaded. Tap 'Analyze All' to process content."
+                    setupFilesList()
+                    updateFileStats()
+                }
                 
                 updateStatus("✅ File uploaded successfully")
                 Toast.makeText(requireContext(), "✅ File uploaded: $fileName", Toast.LENGTH_SHORT).show()
@@ -538,7 +548,43 @@ class FilesFragment : Fragment() {
     }
     
     private fun cleanupOldFiles() {
-        Toast.makeText(requireContext(), "🧹 Old files cleanup feature coming soon!", Toast.LENGTH_SHORT).show()
+        val sharedPrefs = requireContext().getSharedPreferences("file_settings", Context.MODE_PRIVATE)
+        val retentionPeriod = sharedPrefs.getInt("retention_period_days", 30)
+        
+        if (retentionPeriod == -1) {
+            Toast.makeText(requireContext(), "📅 Automatic cleanup is disabled (retention period: never delete)", Toast.LENGTH_LONG).show()
+            return
+        }
+        
+        val cutoffTime = System.currentTimeMillis() - (retentionPeriod * 24 * 60 * 60 * 1000L)
+        val oldFiles = uploadedFiles.filter { file ->
+            val fileObj = File(file.localPath)
+            fileObj.exists() && fileObj.lastModified() < cutoffTime
+        }
+        
+        if (oldFiles.isEmpty()) {
+            Toast.makeText(requireContext(), "✅ No files older than $retentionPeriod days found", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Clean Up Old Files")
+            .setMessage("Found ${oldFiles.size} files older than $retentionPeriod days:\n\n${oldFiles.take(5).joinToString("\n") { "• ${it.name}" }}${if (oldFiles.size > 5) "\n• ... and ${oldFiles.size - 5} more" else ""}\n\nDelete these files?")
+            .setPositiveButton("Delete All") { _, _ ->
+                var deletedCount = 0
+                oldFiles.forEach { file ->
+                    val fileObj = File(file.localPath)
+                    if (fileObj.exists() && fileObj.delete()) {
+                        deletedCount++
+                    }
+                }
+                uploadedFiles.removeAll(oldFiles)
+                setupFilesList()
+                updateFileStats()
+                Toast.makeText(requireContext(), "🧹 Deleted $deletedCount old files", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
     
     private fun cleanupFailedFiles() {
@@ -561,15 +607,98 @@ class FilesFragment : Fragment() {
     }
     
     private fun exportAndCleanup() {
-        Toast.makeText(requireContext(), "📤 Export and cleanup feature coming soon!", Toast.LENGTH_SHORT).show()
+        if (uploadedFiles.isEmpty()) {
+            Toast.makeText(requireContext(), "� No files to export", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Export Files")
+            .setMessage("Export file list and analysis results?\n\n${uploadedFiles.size} files will be included in the export.")
+            .setPositiveButton("Export") { _, _ ->
+                exportFilesList()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun exportFilesList() {
+        lifecycleScope.launch {
+            try {
+                val exportData = buildString {
+                    append("AI Brother - Files Export\n")
+                    append("Export Date: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())}\n")
+                    append("Total Files: ${uploadedFiles.size}\n\n")
+                    
+                    uploadedFiles.forEach { file ->
+                        append("File: ${file.name}\n")
+                        append("Type: ${file.type}\n")
+                        append("Size: ${file.size}\n")
+                        append("Uploaded: ${file.uploadTime}\n")
+                        append("Status: ${file.status}\n")
+                        append("Summary: ${file.summary}\n")
+                        append("---\n\n")
+                    }
+                }
+                
+                val exportFile = File(requireContext().getExternalFilesDir(null), "ai-brother-files-export-${System.currentTimeMillis()}.txt")
+                withContext(Dispatchers.IO) {
+                    exportFile.writeText(exportData)
+                }
+                
+                Toast.makeText(requireContext(), "📤 Files exported to: ${exportFile.name}", Toast.LENGTH_LONG).show()
+                
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "❌ Export failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
     
     private fun toggleAutoAnalysis() {
-        Toast.makeText(requireContext(), "⚙️ Auto-analysis toggle coming soon!", Toast.LENGTH_SHORT).show()
+        val sharedPrefs = requireContext().getSharedPreferences("file_settings", Context.MODE_PRIVATE)
+        val currentSetting = sharedPrefs.getBoolean("auto_analysis_enabled", true)
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Auto-Analysis Settings")
+            .setMessage("Automatically analyze files when uploaded?\n\nCurrent setting: ${if (currentSetting) "Enabled" else "Disabled"}")
+            .setPositiveButton("Enable") { _, _ ->
+                sharedPrefs.edit().putBoolean("auto_analysis_enabled", true).apply()
+                Toast.makeText(requireContext(), "✅ Auto-analysis enabled", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Disable") { _, _ ->
+                sharedPrefs.edit().putBoolean("auto_analysis_enabled", false).apply()
+                Toast.makeText(requireContext(), "❌ Auto-analysis disabled", Toast.LENGTH_SHORT).show()
+            }
+            .setNeutralButton("Cancel", null)
+            .show()
     }
     
     private fun setRetentionPeriod() {
-        Toast.makeText(requireContext(), "📅 Retention period settings coming soon!", Toast.LENGTH_SHORT).show()
+        val sharedPrefs = requireContext().getSharedPreferences("file_settings", Context.MODE_PRIVATE)
+        val currentPeriod = sharedPrefs.getInt("retention_period_days", 30)
+        
+        val periods = arrayOf("7 days", "14 days", "30 days", "60 days", "90 days", "Never delete")
+        val periodValues = arrayOf(7, 14, 30, 60, 90, -1)
+        val currentIndex = periodValues.indexOf(currentPeriod)
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("File Retention Period")
+            .setMessage("How long should files be kept before automatic cleanup?\n\nCurrent: ${if (currentPeriod == -1) "Never delete" else "$currentPeriod days"}")
+            .setSingleChoiceItems(periods, currentIndex.coerceAtLeast(0)) { dialog, which ->
+                val selectedPeriod = periodValues[which]
+                sharedPrefs.edit().putInt("retention_period_days", selectedPeriod).apply()
+                
+                val message = if (selectedPeriod == -1) {
+                    "Files will never be automatically deleted"
+                } else {
+                    "Files will be deleted after $selectedPeriod days"
+                }
+                
+                Toast.makeText(requireContext(), "📅 $message", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
     
     private fun showSupportedTypes() {
@@ -601,7 +730,60 @@ class FilesFragment : Fragment() {
     }
     
     private fun showPrivacySettings() {
-        Toast.makeText(requireContext(), "🔒 Privacy settings coming soon!", Toast.LENGTH_SHORT).show()
+        val sharedPrefs = requireContext().getSharedPreferences("file_settings", Context.MODE_PRIVATE)
+        val encryptFiles = sharedPrefs.getBoolean("encrypt_files", false)
+        val allowAnalysis = sharedPrefs.getBoolean("allow_content_analysis", true)
+        val shareMetadata = sharedPrefs.getBoolean("share_metadata", false)
+        
+        val privacyInfo = buildString {
+            append("🔒 File Privacy Settings\n\n")
+            append("Current Settings:\n")
+            append("• File Encryption: ${if (encryptFiles) "Enabled" else "Disabled"}\n")
+            append("• Content Analysis: ${if (allowAnalysis) "Allowed" else "Blocked"}\n")
+            append("• Metadata Sharing: ${if (shareMetadata) "Enabled" else "Disabled"}\n\n")
+            append("Privacy Information:\n")
+            append("• All files are stored locally on your device\n")
+            append("• No files are uploaded to external servers\n")
+            append("• Analysis is performed entirely offline\n")
+            append("• You have full control over your data")
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Privacy Settings")
+            .setMessage(privacyInfo)
+            .setPositiveButton("Configure") { _, _ ->
+                showPrivacyOptions(sharedPrefs, encryptFiles, allowAnalysis, shareMetadata)
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+    
+    private fun showPrivacyOptions(sharedPrefs: android.content.SharedPreferences, encryptFiles: Boolean, allowAnalysis: Boolean, shareMetadata: Boolean) {
+        val options = arrayOf(
+            "File encryption (currently ${if (encryptFiles) "enabled" else "disabled"})",
+            "Content analysis (currently ${if (allowAnalysis) "allowed" else "blocked"})",
+            "Metadata sharing (currently ${if (shareMetadata) "enabled" else "disabled"})"
+        )
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Configure Privacy")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        sharedPrefs.edit().putBoolean("encrypt_files", !encryptFiles).apply()
+                        Toast.makeText(requireContext(), "🔒 File encryption ${if (!encryptFiles) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                    1 -> {
+                        sharedPrefs.edit().putBoolean("allow_content_analysis", !allowAnalysis).apply()
+                        Toast.makeText(requireContext(), "🔍 Content analysis ${if (!allowAnalysis) "allowed" else "blocked"}", Toast.LENGTH_SHORT).show()
+                    }
+                    2 -> {
+                        sharedPrefs.edit().putBoolean("share_metadata", !shareMetadata).apply()
+                        Toast.makeText(requireContext(), "📊 Metadata sharing ${if (!shareMetadata) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .show()
     }
     
     private fun parseFileSize(sizeStr: String): Long {

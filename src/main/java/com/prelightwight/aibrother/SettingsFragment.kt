@@ -262,8 +262,7 @@ class SettingsFragment : Fragment() {
         }
         
         exportDataButton.setOnClickListener {
-            // TODO: Implement data export functionality
-            Toast.makeText(requireContext(), "📁 Export functionality coming soon!", Toast.LENGTH_SHORT).show()
+            showExportOptions()
         }
         
         resetSettingsButton.setOnClickListener {
@@ -411,6 +410,198 @@ class SettingsFragment : Fragment() {
         mainActivity?.let { activity ->
             val tutorialManager = TutorialManager(activity)
             tutorialManager.startTutorialFromSettings()
+        }
+    }
+    
+    private fun showExportOptions() {
+        val exportOptions = arrayOf(
+            "Export All Settings",
+            "Export Chat History", 
+            "Export Files & Images Data",
+            "Export Complete Backup"
+        )
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Export Data")
+            .setMessage("What would you like to export?")
+            .setItems(exportOptions) { _, which ->
+                when (which) {
+                    0 -> exportSettings()
+                    1 -> exportChatHistory()
+                    2 -> exportFilesAndImages()
+                    3 -> exportCompleteBackup()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun exportSettings() {
+        try {
+            val settingsData = buildString {
+                append("AI Brother - Settings Export\n")
+                append("Export Date: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n\n")
+                
+                append("AI Configuration:\n")
+                append("• Response Style: ${responseStyleSpinner.selectedItem}\n")
+                append("• Creativity Level: ${creativitySeekBar.progress}%\n")
+                append("• Memory Enabled: ${memorySwitch.isChecked}\n\n")
+                
+                append("Appearance:\n")
+                append("• Dark Theme: ${darkThemeSwitch.isChecked}\n")
+                append("• Rounded Bubbles: ${roundedBubblesSwitch.isChecked}\n")
+                append("• Font Size: ${fontSizeValue.text}\n\n")
+                
+                append("Privacy & Data:\n")
+                append("• Local Processing: ${localProcessingSwitch.isChecked}\n")
+                append("• Auto Delete: ${autoDeleteSpinner.selectedItem}\n\n")
+                
+                append("App Behavior:\n")
+                append("• Notifications: ${notificationsSwitch.isChecked}\n")
+                append("• Auto Backup: ${autoBackupSwitch.isChecked}\n")
+                append("• Response Speed: ${responseSpeedValue.text}\n")
+            }
+            
+            val exportFile = java.io.File(requireContext().getExternalFilesDir(null), "ai-brother-settings-${System.currentTimeMillis()}.txt")
+            exportFile.writeText(settingsData)
+            
+            Toast.makeText(requireContext(), "📄 Settings exported to: ${exportFile.name}", Toast.LENGTH_LONG).show()
+            
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "❌ Export failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    private fun exportChatHistory() {
+        try {
+            val conversationManager = ConversationManager.getInstance(requireContext())
+            val conversations = conversationManager.getAllConversations()
+            
+            val chatData = buildString {
+                append("AI Brother - Chat History Export\n")
+                append("Export Date: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n")
+                append("Total Conversations: ${conversations.size}\n\n")
+                
+                conversations.forEach { (conversationId, messages) ->
+                    append("Conversation ID: $conversationId\n")
+                    append("Messages: ${messages.size}\n")
+                    append("---\n")
+                    
+                    messages.forEach { message ->
+                        append("${if (message.isUser) "User" else "AI"}: ${message.content}\n")
+                        append("Time: ${ChatMessage.formatTimestamp(message.timestamp)}\n\n")
+                    }
+                    
+                    append("=========\n\n")
+                }
+            }
+            
+            val exportFile = java.io.File(requireContext().getExternalFilesDir(null), "ai-brother-chat-${System.currentTimeMillis()}.txt")
+            exportFile.writeText(chatData)
+            
+            Toast.makeText(requireContext(), "💬 Chat history exported to: ${exportFile.name}", Toast.LENGTH_LONG).show()
+            
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "❌ Chat export failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    private fun exportFilesAndImages() {
+        try {
+            val filesData = buildString {
+                append("AI Brother - Files & Images Export\n")
+                append("Export Date: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n\n")
+                
+                // Get files data
+                val filesDir = java.io.File(requireContext().getExternalFilesDir(null), "uploaded_files")
+                if (filesDir.exists()) {
+                    val files = filesDir.listFiles() ?: emptyArray()
+                    append("Uploaded Files: ${files.size}\n")
+                    files.forEach { file ->
+                        append("• ${file.name} (${file.length()} bytes)\n")
+                    }
+                    append("\n")
+                }
+                
+                // Get images data  
+                val imagesDir = java.io.File(requireContext().getExternalFilesDir(null), "captured_images")
+                if (imagesDir.exists()) {
+                    val images = imagesDir.listFiles() ?: emptyArray()
+                    append("Captured Images: ${images.size}\n")
+                    images.forEach { image ->
+                        append("• ${image.name} (${image.length()} bytes)\n")
+                    }
+                }
+                
+                append("\nNote: This export contains metadata only. Actual files remain in app storage.")
+            }
+            
+            val exportFile = java.io.File(requireContext().getExternalFilesDir(null), "ai-brother-files-metadata-${System.currentTimeMillis()}.txt")
+            exportFile.writeText(filesData)
+            
+            Toast.makeText(requireContext(), "📁 Files metadata exported to: ${exportFile.name}", Toast.LENGTH_LONG).show()
+            
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "❌ Files export failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    private fun exportCompleteBackup() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Complete Backup")
+            .setMessage("Create a complete backup including settings, chat history, and file metadata?")
+            .setPositiveButton("Create Backup") { _, _ ->
+                createCompleteBackup()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun createCompleteBackup() {
+        try {
+            val backupData = buildString {
+                append("AI BROTHER - COMPLETE BACKUP\n")
+                append("=".repeat(40) + "\n")
+                append("Backup Date: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n")
+                append("App Version: 2.0.3\n\n")
+                
+                // Settings section
+                append("SETTINGS:\n")
+                append("-".repeat(20) + "\n")
+                append("Response Style: ${responseStyleSpinner.selectedItem}\n")
+                append("Creativity: ${creativitySeekBar.progress}%\n")
+                append("Memory: ${memorySwitch.isChecked}\n")
+                append("Dark Theme: ${darkThemeSwitch.isChecked}\n")
+                append("Local Processing: ${localProcessingSwitch.isChecked}\n\n")
+                
+                // Chat stats
+                val conversationManager = ConversationManager.getInstance(requireContext())
+                val conversations = conversationManager.getAllConversations()
+                val storageStats = conversationManager.getStorageStats()
+                append("CHAT HISTORY:\n")
+                append("-".repeat(20) + "\n")
+                append("Total Conversations: ${conversations.size}\n")
+                append("Total Messages: ${storageStats.totalMessages}\n\n")
+                
+                // Files stats
+                val filesDir = java.io.File(requireContext().getExternalFilesDir(null), "uploaded_files")
+                val imagesDir = java.io.File(requireContext().getExternalFilesDir(null), "captured_images")
+                append("FILES & IMAGES:\n")
+                append("-".repeat(20) + "\n")
+                append("Uploaded Files: ${filesDir.listFiles()?.size ?: 0}\n")
+                append("Captured Images: ${imagesDir.listFiles()?.size ?: 0}\n\n")
+                
+                append("This backup contains metadata and settings.\n")
+                append("For complete data recovery, ensure all app data is backed up through Android settings.\n")
+            }
+            
+            val backupFile = java.io.File(requireContext().getExternalFilesDir(null), "ai-brother-complete-backup-${System.currentTimeMillis()}.txt")
+            backupFile.writeText(backupData)
+            
+            Toast.makeText(requireContext(), "💾 Complete backup created: ${backupFile.name}", Toast.LENGTH_LONG).show()
+            
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "❌ Backup failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 }

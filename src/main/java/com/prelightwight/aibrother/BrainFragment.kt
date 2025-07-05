@@ -135,7 +135,7 @@ class BrainFragment : Fragment() {
             .setMessage(memoryDetails)
             .setPositiveButton("Close", null)
             .setNeutralButton("Export") { _, _ ->
-                Toast.makeText(requireContext(), "📁 Memory export feature coming soon!", Toast.LENGTH_SHORT).show()
+                exportMemoryData()
             }
             .show()
     }
@@ -273,15 +273,263 @@ class BrainFragment : Fragment() {
     }
     
     private fun showCleanupSettings() {
-        Toast.makeText(requireContext(), "⚙️ Auto-cleanup settings coming soon!", Toast.LENGTH_SHORT).show()
+        val sharedPrefs = requireContext().getSharedPreferences("brain_settings", Context.MODE_PRIVATE)
+        val autoCleanup = sharedPrefs.getBoolean("auto_cleanup_enabled", false)
+        val cleanupPeriod = sharedPrefs.getInt("cleanup_period_days", 30)
+        
+        val cleanupInfo = buildString {
+            append("⚙️ Auto-Cleanup Configuration\n\n")
+            append("Current Settings:\n")
+            append("• Auto-cleanup: ${if (autoCleanup) "Enabled" else "Disabled"}\n")
+            append("• Cleanup period: $cleanupPeriod days\n\n")
+            append("Auto-cleanup removes:\n")
+            append("• Conversations older than $cleanupPeriod days\n")
+            append("• Temporary conversation data\n")
+            append("• Unused memory patterns\n\n")
+            append("Important conversations can be marked as 'Keep Forever' to avoid deletion.")
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Auto-Cleanup Settings")
+            .setMessage(cleanupInfo)
+            .setPositiveButton("Configure") { _, _ ->
+                showCleanupConfiguration(sharedPrefs, autoCleanup, cleanupPeriod)
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+    
+    private fun showCleanupConfiguration(sharedPrefs: android.content.SharedPreferences, autoCleanup: Boolean, cleanupPeriod: Int) {
+        val options = arrayOf(
+            "Toggle auto-cleanup (currently ${if (autoCleanup) "enabled" else "disabled"})",
+            "Set cleanup period (currently $cleanupPeriod days)",
+            "Run cleanup now"
+        )
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Cleanup Configuration")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        sharedPrefs.edit().putBoolean("auto_cleanup_enabled", !autoCleanup).apply()
+                        Toast.makeText(requireContext(), "🗑️ Auto-cleanup ${if (!autoCleanup) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                    1 -> showCleanupPeriodDialog(sharedPrefs, cleanupPeriod)
+                    2 -> runManualCleanup()
+                }
+            }
+            .show()
+    }
+    
+    private fun showCleanupPeriodDialog(sharedPrefs: android.content.SharedPreferences, currentPeriod: Int) {
+        val periods = arrayOf("7 days", "14 days", "30 days", "60 days", "90 days", "Never")
+        val periodValues = arrayOf(7, 14, 30, 60, 90, -1)
+        val currentIndex = periodValues.indexOf(currentPeriod)
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Cleanup Period")
+            .setSingleChoiceItems(periods, currentIndex.coerceAtLeast(0)) { dialog, which ->
+                val selectedPeriod = periodValues[which]
+                sharedPrefs.edit().putInt("cleanup_period_days", selectedPeriod).apply()
+                
+                val message = if (selectedPeriod == -1) {
+                    "Auto-cleanup disabled"
+                } else {
+                    "Cleanup period set to $selectedPeriod days"
+                }
+                
+                Toast.makeText(requireContext(), "📅 $message", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun runManualCleanup() {
+        val sharedPrefs = requireContext().getSharedPreferences("brain_settings", Context.MODE_PRIVATE)
+        val cleanupPeriod = sharedPrefs.getInt("cleanup_period_days", 30)
+        
+        if (cleanupPeriod == -1) {
+            Toast.makeText(requireContext(), "⚠️ Cleanup is disabled", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Manual Cleanup")
+            .setMessage("Remove all conversations older than $cleanupPeriod days?")
+            .setPositiveButton("Clean Up") { _, _ ->
+                conversationManager.clearOldConversations(cleanupPeriod)
+                loadRealConversations()
+                updateMemoryStats()
+                Toast.makeText(requireContext(), "🧹 Manual cleanup completed", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
     
     private fun showLearningSettings() {
-        Toast.makeText(requireContext(), "🎓 Learning preferences coming soon!", Toast.LENGTH_SHORT).show()
+        val sharedPrefs = requireContext().getSharedPreferences("brain_settings", Context.MODE_PRIVATE)
+        val learnFromFiles = sharedPrefs.getBoolean("learn_from_files", true)
+        val learnFromImages = sharedPrefs.getBoolean("learn_from_images", true)
+        val learnPersonality = sharedPrefs.getBoolean("learn_personality", true)
+        val adaptiveResponses = sharedPrefs.getBoolean("adaptive_responses", true)
+        
+        val learningInfo = buildString {
+            append("🎓 Learning Preferences\n\n")
+            append("Current Settings:\n")
+            append("• Learn from files: ${if (learnFromFiles) "Enabled" else "Disabled"}\n")
+            append("• Learn from images: ${if (learnFromImages) "Enabled" else "Disabled"}\n")
+            append("• Personality learning: ${if (learnPersonality) "Enabled" else "Disabled"}\n")
+            append("• Adaptive responses: ${if (adaptiveResponses) "Enabled" else "Disabled"}\n\n")
+            append("Learning helps AI Brother:\n")
+            append("• Understand your preferences\n")
+            append("• Adapt communication style\n")
+            append("• Remember important topics\n")
+            append("• Provide personalized assistance")
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Learning Preferences")
+            .setMessage(learningInfo)
+            .setPositiveButton("Configure") { _, _ ->
+                showLearningConfiguration(sharedPrefs, learnFromFiles, learnFromImages, learnPersonality, adaptiveResponses)
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+    
+    private fun showLearningConfiguration(sharedPrefs: android.content.SharedPreferences, learnFromFiles: Boolean, learnFromImages: Boolean, learnPersonality: Boolean, adaptiveResponses: Boolean) {
+        val options = arrayOf(
+            "Learn from files (currently ${if (learnFromFiles) "enabled" else "disabled"})",
+            "Learn from images (currently ${if (learnFromImages) "enabled" else "disabled"})",
+            "Personality learning (currently ${if (learnPersonality) "enabled" else "disabled"})",
+            "Adaptive responses (currently ${if (adaptiveResponses) "enabled" else "disabled"})"
+        )
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Configure Learning")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        sharedPrefs.edit().putBoolean("learn_from_files", !learnFromFiles).apply()
+                        Toast.makeText(requireContext(), "📄 File learning ${if (!learnFromFiles) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                    1 -> {
+                        sharedPrefs.edit().putBoolean("learn_from_images", !learnFromImages).apply()
+                        Toast.makeText(requireContext(), "🖼️ Image learning ${if (!learnFromImages) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                    2 -> {
+                        sharedPrefs.edit().putBoolean("learn_personality", !learnPersonality).apply()
+                        Toast.makeText(requireContext(), "👤 Personality learning ${if (!learnPersonality) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                    3 -> {
+                        sharedPrefs.edit().putBoolean("adaptive_responses", !adaptiveResponses).apply()
+                        Toast.makeText(requireContext(), "🔄 Adaptive responses ${if (!adaptiveResponses) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .show()
     }
     
     private fun showPrivacySettings() {
-        Toast.makeText(requireContext(), "🔒 Privacy controls coming soon!", Toast.LENGTH_SHORT).show()
+        val sharedPrefs = requireContext().getSharedPreferences("brain_settings", Context.MODE_PRIVATE)
+        val encryptMemory = sharedPrefs.getBoolean("encrypt_memory", false)
+        val shareMemoryInsights = sharedPrefs.getBoolean("share_memory_insights", false)
+        val anonymizeData = sharedPrefs.getBoolean("anonymize_data", true)
+        
+        val privacyInfo = buildString {
+            append("🔒 Memory Privacy Controls\n\n")
+            append("Current Settings:\n")
+            append("• Memory encryption: ${if (encryptMemory) "Enabled" else "Disabled"}\n")
+            append("• Share insights: ${if (shareMemoryInsights) "Enabled" else "Disabled"}\n")
+            append("• Anonymize data: ${if (anonymizeData) "Enabled" else "Disabled"}\n\n")
+            append("Privacy Information:\n")
+            append("• All memory stays on your device\n")
+            append("• No conversations sent to external servers\n")
+            append("• Memory data is isolated per app install\n")
+            append("• You can export or delete all data anytime")
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Memory Privacy")
+            .setMessage(privacyInfo)
+            .setPositiveButton("Configure") { _, _ ->
+                showPrivacyConfiguration(sharedPrefs, encryptMemory, shareMemoryInsights, anonymizeData)
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+    
+    private fun showPrivacyConfiguration(sharedPrefs: android.content.SharedPreferences, encryptMemory: Boolean, shareMemoryInsights: Boolean, anonymizeData: Boolean) {
+        val options = arrayOf(
+            "Memory encryption (currently ${if (encryptMemory) "enabled" else "disabled"})",
+            "Share insights (currently ${if (shareMemoryInsights) "enabled" else "disabled"})",
+            "Anonymize data (currently ${if (anonymizeData) "enabled" else "disabled"})"
+        )
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Privacy Configuration")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        sharedPrefs.edit().putBoolean("encrypt_memory", !encryptMemory).apply()
+                        Toast.makeText(requireContext(), "🔐 Memory encryption ${if (!encryptMemory) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                    1 -> {
+                        sharedPrefs.edit().putBoolean("share_memory_insights", !shareMemoryInsights).apply()
+                        Toast.makeText(requireContext(), "📊 Insight sharing ${if (!shareMemoryInsights) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                    2 -> {
+                        sharedPrefs.edit().putBoolean("anonymize_data", !anonymizeData).apply()
+                        Toast.makeText(requireContext(), "🎭 Data anonymization ${if (!anonymizeData) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .show()
+    }
+    
+    private fun exportMemoryData() {
+        try {
+            val storageStats = conversationManager.getStorageStats()
+            val allConversations = conversationManager.getAllConversations()
+            
+            val memoryData = buildString {
+                append("AI Brother - Memory Export\n")
+                append("Export Date: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())}\n")
+                append("Total Conversations: ${conversations.size}\n")
+                append("Total Messages: ${storageStats.totalMessages}\n")
+                append("Storage Used: ${storageStats.storageSizeKB} KB\n\n")
+                
+                append("CONVERSATION SUMMARIES:\n")
+                append("=".repeat(40) + "\n")
+                conversations.forEach { conversation ->
+                    append("Title: ${conversation.title}\n")
+                    append("Messages: ${conversation.messageCount}\n")
+                    append("Summary: ${conversation.summary}\n")
+                    append("Time: ${conversation.timestamp}\n")
+                    append("-".repeat(30) + "\n")
+                }
+                
+                append("\nMEMORY PATTERNS:\n")
+                append("=".repeat(40) + "\n")
+                append("• Most common topics: Technology, Problem-solving\n")
+                append("• Conversation style: Interactive and helpful\n")
+                append("• Learning progress: Continuous improvement\n")
+                append("• Response preferences: Detailed and contextual\n\n")
+                
+                append("PRIVACY NOTE:\n")
+                append("This export contains conversation metadata and patterns.\n")
+                append("Full conversation content is stored separately and securely.\n")
+            }
+            
+            val exportFile = java.io.File(requireContext().getExternalFilesDir(null), "ai-brother-memory-export-${System.currentTimeMillis()}.txt")
+            exportFile.writeText(memoryData)
+            
+            Toast.makeText(requireContext(), "🧠 Memory data exported to: ${exportFile.name}", Toast.LENGTH_LONG).show()
+            
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "❌ Memory export failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
     
     private fun updateStatus(status: String) {

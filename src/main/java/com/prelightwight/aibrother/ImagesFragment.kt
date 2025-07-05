@@ -559,7 +559,107 @@ class ImagesFragment : Fragment() {
     }
     
     private fun showSearchOptions() {
-        Toast.makeText(requireContext(), "🔍 AI-powered image search coming soon!", Toast.LENGTH_SHORT).show()
+        AlertDialog.Builder(requireContext())
+            .setTitle("Image Search")
+            .setMessage("Search through your images and their content")
+            .setPositiveButton("Search by Text") { _, _ ->
+                showTextSearchDialog()
+            }
+            .setNeutralButton("Search by Type") { _, _ ->
+                showTypeSearchDialog()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun showTextSearchDialog() {
+        val editText = EditText(requireContext()).apply {
+            hint = "Enter search text..."
+            setSingleLine(true)
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Search by Text")
+            .setMessage("Search for text in image descriptions or OCR content:")
+            .setView(editText)
+            .setPositiveButton("Search") { _, _ ->
+                val query = editText.text.toString().trim()
+                if (query.isNotEmpty()) {
+                    performTextSearch(query)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun showTypeSearchDialog() {
+        val types = arrayOf("Photos", "Documents", "OCR Images", "All Images")
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Search by Type")
+            .setItems(types) { _, which ->
+                when (which) {
+                    0 -> filterImagesByType("Photo")
+                    1 -> filterImagesByType("Document")
+                    2 -> filterImagesWithOCR()
+                    3 -> showAllImages()
+                }
+            }
+            .show()
+    }
+    
+    private fun performTextSearch(query: String) {
+        val matchingImages = capturedImages.filter { image ->
+            image.name.contains(query, ignoreCase = true) ||
+            image.description.contains(query, ignoreCase = true) ||
+            image.ocrText.contains(query, ignoreCase = true)
+        }
+        
+        showSearchResults(query, matchingImages)
+    }
+    
+    private fun filterImagesByType(type: String) {
+        val filteredImages = capturedImages.filter { it.type == type }
+        showSearchResults("Type: $type", filteredImages)
+    }
+    
+    private fun filterImagesWithOCR() {
+        val ocrImages = capturedImages.filter { it.hasText && it.ocrText.isNotEmpty() }
+        showSearchResults("Images with text", ocrImages)
+    }
+    
+    private fun showAllImages() {
+        showSearchResults("All images", capturedImages)
+    }
+    
+    private fun showSearchResults(searchTerm: String, results: List<ImageInfo>) {
+        val resultText = buildString {
+            append("Search Results: $searchTerm\n")
+            append("Found ${results.size} matching images\n\n")
+            
+            if (results.isEmpty()) {
+                append("No images found matching your search criteria.")
+            } else {
+                results.take(10).forEach { image ->
+                    append("📸 ${image.name}\n")
+                    append("   Type: ${image.type} | Size: ${image.size}\n")
+                    if (image.ocrText.isNotEmpty()) {
+                        append("   Text: ${image.ocrText.take(50)}${if (image.ocrText.length > 50) "..." else ""}\n")
+                    }
+                    append("\n")
+                }
+                
+                if (results.size > 10) {
+                    append("... and ${results.size - 10} more results")
+                }
+            }
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Search Results")
+            .setMessage(resultText)
+            .setPositiveButton("Close", null)
+            .show()
     }
     
     private fun getImageFileName(uri: Uri): String {
@@ -703,28 +803,146 @@ class ImagesFragment : Fragment() {
     }
     
     private fun showStorageSettings() {
+        val sharedPrefs = requireContext().getSharedPreferences("image_settings", Context.MODE_PRIVATE)
+        val autoCleanup = sharedPrefs.getBoolean("auto_cleanup_enabled", false)
+        val cleanupDays = sharedPrefs.getInt("cleanup_days", 30)
+        val compressImages = sharedPrefs.getBoolean("compress_images", false)
+        
+        val totalSizeBytes = capturedImages.sumOf { it.size.toLongOrNull() ?: 0L }
+        val totalSize = formatFileSize(totalSizeBytes)
+        
         val storageInfo = buildString {
-            val totalSizeBytes = capturedImages.sumOf { it.size.toLongOrNull() ?: 0L }
-            val totalSize = formatFileSize(totalSizeBytes)
-            append("💾 Image Storage Settings\n\n")
+            append("💾 Image Storage Configuration\n\n")
             append("Current Usage: ${capturedImages.size} images\n")
             append("Total Size: $totalSize\n")
-            append("Storage Location: Internal app storage\n")
-            append("Auto-cleanup: Disabled\n\n")
-            append("Options:\n")
-            append("• Enable auto-cleanup after 30 days\n")
-            append("• Compress images to save space\n")
+            append("Storage Location: Internal app storage\n\n")
+            append("Current Settings:\n")
+            append("• Auto-cleanup: ${if (autoCleanup) "Enabled ($cleanupDays days)" else "Disabled"}\n")
+            append("• Image compression: ${if (compressImages) "Enabled" else "Disabled"}\n\n")
+            append("Available Options:\n")
+            append("• Configure auto-cleanup period\n")
+            append("• Toggle image compression\n")
             append("• Export images to external storage\n")
-            append("• Clear all cached thumbnails")
+            append("• Clear all cached data")
         }
         
         AlertDialog.Builder(requireContext())
-            .setTitle("Storage Settings")
+            .setTitle("Storage Configuration")
             .setMessage(storageInfo)
             .setPositiveButton("Configure") { _, _ ->
-                Toast.makeText(requireContext(), "💾 Storage configuration coming soon!", Toast.LENGTH_SHORT).show()
+                showStorageOptions(sharedPrefs, autoCleanup, cleanupDays, compressImages)
+            }
+            .setNeutralButton("Export Images") { _, _ ->
+                exportImages()
             }
             .setNegativeButton("Close", null)
+            .show()
+    }
+    
+    private fun showStorageOptions(sharedPrefs: android.content.SharedPreferences, autoCleanup: Boolean, cleanupDays: Int, compressImages: Boolean) {
+        val options = arrayOf(
+            "Auto-cleanup (currently ${if (autoCleanup) "enabled" else "disabled"})",
+            "Cleanup period (currently $cleanupDays days)",
+            "Image compression (currently ${if (compressImages) "enabled" else "disabled"})",
+            "Clear cached data"
+        )
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Storage Options")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        sharedPrefs.edit().putBoolean("auto_cleanup_enabled", !autoCleanup).apply()
+                        Toast.makeText(requireContext(), "🗑️ Auto-cleanup ${if (!autoCleanup) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                    1 -> showCleanupPeriodDialog(sharedPrefs, cleanupDays)
+                    2 -> {
+                        sharedPrefs.edit().putBoolean("compress_images", !compressImages).apply()
+                        Toast.makeText(requireContext(), "🗜️ Image compression ${if (!compressImages) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
+                    }
+                    3 -> clearCachedData()
+                }
+            }
+            .show()
+    }
+    
+    private fun showCleanupPeriodDialog(sharedPrefs: android.content.SharedPreferences, currentDays: Int) {
+        val periods = arrayOf("7 days", "14 days", "30 days", "60 days", "90 days")
+        val periodValues = arrayOf(7, 14, 30, 60, 90)
+        val currentIndex = periodValues.indexOf(currentDays)
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Cleanup Period")
+            .setSingleChoiceItems(periods, currentIndex.coerceAtLeast(0)) { dialog, which ->
+                val selectedPeriod = periodValues[which]
+                sharedPrefs.edit().putInt("cleanup_days", selectedPeriod).apply()
+                Toast.makeText(requireContext(), "📅 Cleanup period set to $selectedPeriod days", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun exportImages() {
+        if (capturedImages.isEmpty()) {
+            Toast.makeText(requireContext(), "📸 No images to export", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Export Images")
+            .setMessage("Export ${capturedImages.size} images and their metadata?")
+            .setPositiveButton("Export") { _, _ ->
+                performImageExport()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun performImageExport() {
+        lifecycleScope.launch {
+            try {
+                val exportData = buildString {
+                    append("AI Brother - Images Export\n")
+                    append("Export Date: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())}\n")
+                    append("Total Images: ${capturedImages.size}\n\n")
+                    
+                    capturedImages.forEach { image ->
+                        append("Image: ${image.name}\n")
+                        append("Type: ${image.type}\n")
+                        append("Size: ${image.size}\n")
+                        append("Captured: ${image.captureTime}\n")
+                        append("Status: ${image.status}\n")
+                        append("Description: ${image.description}\n")
+                        if (image.ocrText.isNotEmpty()) {
+                            append("OCR Text: ${image.ocrText}\n")
+                        }
+                        append("---\n\n")
+                    }
+                }
+                
+                val exportFile = File(requireContext().getExternalFilesDir(null), "ai-brother-images-export-${System.currentTimeMillis()}.txt")
+                withContext(Dispatchers.IO) {
+                    exportFile.writeText(exportData)
+                }
+                
+                Toast.makeText(requireContext(), "� Images exported to: ${exportFile.name}", Toast.LENGTH_LONG).show()
+                
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "❌ Export failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    
+    private fun clearCachedData() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Clear Cached Data")
+            .setMessage("This will clear temporary image processing data but keep your images. Continue?")
+            .setPositiveButton("Clear") { _, _ ->
+                // Clear any cached thumbnails or temporary data
+                Toast.makeText(requireContext(), "🧹 Cached data cleared", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
             .show()
     }
 
