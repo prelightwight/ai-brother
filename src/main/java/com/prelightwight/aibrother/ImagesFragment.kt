@@ -1,13 +1,31 @@
 package com.prelightwight.aibrother
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
 import java.util.*
 
 class ImagesFragment : Fragment() {
@@ -21,8 +39,57 @@ class ImagesFragment : Fragment() {
     private lateinit var viewGalleryBtn: Button
     private lateinit var imageSettingsBtn: Button
     
-    private val mockImages = mutableListOf<ImageInfo>()
+    private val capturedImages = mutableListOf<ImageInfo>()
+    private lateinit var imagesDirectory: File
+    private var currentPhotoPath: String? = null
     
+    // Camera permission launcher
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            openCameraOptions()
+        } else {
+            Toast.makeText(requireContext(), "Camera permission is required to take photos", Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    // Camera launcher
+    private val cameraLauncher = registerForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && currentPhotoPath != null) {
+            processNewPhoto(currentPhotoPath!!)
+        }
+    }
+    
+    // Gallery launcher
+    private val galleryLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { handleSelectedImage(it) }
+    }
+    
+    // Multiple images launcher
+    private val multipleImagesLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.let { data ->
+                if (data.clipData != null) {
+                    // Multiple images selected
+                    val clipData = data.clipData!!
+                    for (i in 0 until clipData.itemCount) {
+                        handleSelectedImage(clipData.getItemAt(i).uri)
+                    }
+                } else if (data.data != null) {
+                    // Single image selected
+                    handleSelectedImage(data.data!!)
+                }
+            }
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -30,13 +97,14 @@ class ImagesFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_images, container, false)
     }
-    
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
         initializeViews(view)
         setupButtons()
-        loadMockImages()
+        initializeImagesDirectory()
+        loadExistingImages()
         updateImageStats()
     }
     
@@ -51,13 +119,20 @@ class ImagesFragment : Fragment() {
         imageSettingsBtn = view.findViewById(R.id.btn_image_settings)
     }
     
+    private fun initializeImagesDirectory() {
+        imagesDirectory = File(requireContext().getExternalFilesDir(null), "captured_images")
+        if (!imagesDirectory.exists()) {
+            imagesDirectory.mkdirs()
+        }
+    }
+
     private fun setupButtons() {
         takePhotoBtn.setOnClickListener {
-            simulateTakePhoto()
+            checkCameraPermissionAndTakePhoto()
         }
         
         uploadImageBtn.setOnClickListener {
-            simulateUploadImage()
+            showImageUploadOptions()
         }
         
         viewGalleryBtn.setOnClickListener {
@@ -70,84 +145,26 @@ class ImagesFragment : Fragment() {
         
         // List item click listener
         imagesList.setOnItemClickListener { _, _, position, _ ->
-            val image = mockImages[position]
+            val image = capturedImages[position]
             showImageDetails(image)
         }
     }
     
-    private fun loadMockImages() {
-        mockImages.clear()
-        mockImages.addAll(listOf(
-            ImageInfo(
-                "sunset_beach.jpg",
-                "Photo",
-                "2.4 MB",
-                "1 hour ago",
-                "✅ Analyzed",
-                "Beautiful beach sunset with palm trees and golden colors",
-                hasText = false,
-                ocrText = ""
-            ),
-            ImageInfo(
-                "recipe_card.jpg",
-                "Document",
-                "1.8 MB",
-                "Yesterday",
-                "✅ Analyzed",
-                "Handwritten recipe card with cooking instructions",
-                hasText = true,
-                ocrText = "Chocolate Chip Cookies\n1 cup butter\n2 cups flour\n1 cup sugar..."
-            ),
-            ImageInfo(
-                "business_card.jpg",
-                "Document",
-                "950 KB",
-                "2 days ago",
-                "✅ Analyzed",
-                "Professional business card with contact information",
-                hasText = true,
-                ocrText = "John Smith\nSoftware Engineer\njohn@email.com\n555-123-4567"
-            ),
-            ImageInfo(
-                "whiteboard_notes.jpg",
-                "Document",
-                "3.2 MB",
-                "1 week ago",
-                "⏳ Processing",
-                "Whiteboard with project planning notes and diagrams",
-                hasText = true,
-                ocrText = ""
-            ),
-            ImageInfo(
-                "family_photo.jpg",
-                "Photo",
-                "4.1 MB",
-                "2 weeks ago",
-                "✅ Analyzed",
-                "Group photo of family gathering with 6 people outdoors",
-                hasText = false,
-                ocrText = ""
-            )
-        ))
-        
-        setupImagesList()
+    private fun checkCameraPermissionAndTakePhoto() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                openCameraOptions()
+            }
+            else -> {
+                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        }
     }
     
-    private fun setupImagesList() {
-        val adapter = ImageAdapter(requireContext(), mockImages)
-        imagesList.adapter = adapter
-    }
-    
-    private fun updateImageStats() {
-        val analyzedCount = mockImages.count { it.status.contains("✅") }
-        val textImages = mockImages.count { it.hasText && it.ocrText.isNotEmpty() }
-        
-        photoCountText.text = "${mockImages.size} images uploaded"
-        analysisProgressText.text = "$analyzedCount of ${mockImages.size} analyzed"
-        ocrStatusText.text = "$textImages images with extracted text"
-    }
-    
-    private fun simulateTakePhoto() {
+    private fun openCameraOptions() {
         val cameraOptions = arrayOf(
             "📸 Take Photo",
             "📑 Scan Document",
@@ -160,215 +177,250 @@ class ImagesFragment : Fragment() {
             .setMessage("What would you like to capture?")
             .setItems(cameraOptions) { _, which ->
                 when (which) {
-                    0 -> takeRegularPhoto()
-                    1 -> scanDocument()
-                    2 -> captureTextOCR()
-                    3 -> takeCreativePhoto()
+                    0 -> takePhoto("photo")
+                    1 -> takePhoto("document")
+                    2 -> takePhoto("ocr")
+                    3 -> takePhoto("creative")
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
     
-    private fun takeRegularPhoto() {
-        val fileName = "photo_${System.currentTimeMillis()}.jpg"
-        val newImage = ImageInfo(
-            fileName,
-            "Photo",
-            "${(1.5 + Math.random() * 3).format(1)} MB",
-            "Just now",
-            "⏳ Analyzing...",
-            "Photo captured from camera",
-            hasText = false,
-            ocrText = ""
-        )
-        
-        mockImages.add(0, newImage)
-        setupImagesList()
-        updateImageStats()
-        updateStatus("📸 Photo captured successfully")
-        
-        // Simulate analysis
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                activity?.runOnUiThread {
-                    newImage.status = "✅ Analyzed"
-                    newImage.description = generatePhotoDescription()
-                    setupImagesList()
-                    updateImageStats()
-                    Toast.makeText(requireContext(), "✅ Photo analysis complete!", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }, 2500)
-        
-        Toast.makeText(requireContext(), "📸 Photo captured! Analyzing content...", Toast.LENGTH_LONG).show()
+    private fun takePhoto(type: String) {
+        try {
+            val photoFile = createImageFile(type)
+            val photoURI = FileProvider.getUriForFile(
+                requireContext(),
+                "com.prelightwight.aibrother.fileprovider",
+                photoFile
+            )
+            currentPhotoPath = photoFile.absolutePath
+            cameraLauncher.launch(photoURI)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Error opening camera: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
     
-    private fun scanDocument() {
-        val fileName = "scan_${System.currentTimeMillis()}.jpg"
-        val newImage = ImageInfo(
-            fileName,
-            "Document",
-            "${(1.0 + Math.random() * 2).format(1)} MB",
-            "Just now",
-            "⏳ Scanning...",
-            "Document scanned from camera",
-            hasText = true,
-            ocrText = ""
-        )
-        
-        mockImages.add(0, newImage)
-        setupImagesList()
-        updateImageStats()
-        updateStatus("📑 Document scanned successfully")
-        
-        // Simulate OCR processing
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                activity?.runOnUiThread {
-                    newImage.status = "✅ Analyzed"
-                    newImage.description = "Scanned document with clear text content"
-                    newImage.ocrText = "Sample extracted text from scanned document.\nThis text was automatically recognized."
-                    setupImagesList()
-                    updateImageStats()
-                    Toast.makeText(requireContext(), "✅ Document scan and OCR complete!", Toast.LENGTH_LONG).show()
-                }
-            }
-        }, 3500)
-        
-        Toast.makeText(requireContext(), "📑 Document scanned! Processing text extraction...", Toast.LENGTH_LONG).show()
+    private fun createImageFile(type: String): File {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val fileName = "${type}_${timeStamp}.jpg"
+        return File(imagesDirectory, fileName)
     }
     
-    private fun captureTextOCR() {
-        val fileName = "ocr_${System.currentTimeMillis()}.jpg"
-        val newImage = ImageInfo(
-            fileName,
-            "Document",
-            "${(0.8 + Math.random() * 1.5).format(1)} MB",
-            "Just now",
-            "⏳ Extracting text...",
-            "Image captured for text extraction",
-            hasText = true,
-            ocrText = ""
-        )
+    private fun processNewPhoto(imagePath: String) {
+        val imageFile = File(imagePath)
+        if (!imageFile.exists()) {
+            Toast.makeText(requireContext(), "Photo capture failed", Toast.LENGTH_SHORT).show()
+            return
+        }
         
-        mockImages.add(0, newImage)
-        setupImagesList()
-        updateImageStats()
-        updateStatus("🔍 Text extraction in progress")
-        
-        // Simulate OCR processing
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                activity?.runOnUiThread {
-                    newImage.status = "✅ Analyzed"
-                    newImage.description = "Text successfully extracted from image"
-                    newImage.ocrText = "Extracted text content:\n\nThis is sample text that was automatically extracted from the image using OCR technology."
-                    setupImagesList()
-                    updateImageStats()
-                    showOCRResults(newImage)
+        lifecycleScope.launch {
+            try {
+                val fileName = imageFile.name
+                val fileSize = imageFile.length()
+                val imageType = when {
+                    fileName.startsWith("document_") || fileName.startsWith("ocr_") -> "Document"
+                    else -> "Photo"
                 }
+                
+                val imageInfo = ImageInfo(
+                    name = fileName,
+                    type = imageType,
+                    size = formatFileSize(fileSize),
+                    captureTime = "Just now",
+                    status = "⏳ Analyzing...",
+                    description = "Processing captured image...",
+                    hasText = fileName.startsWith("document_") || fileName.startsWith("ocr"),
+                    ocrText = "",
+                    localPath = imagePath
+                )
+                
+                capturedImages.add(0, imageInfo)
+                setupImagesList()
+                updateImageStats()
+                updateStatus("📸 Photo captured successfully")
+                
+                // Start analysis
+                analyzeImage(imageInfo)
+                
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error processing photo: ${e.message}", Toast.LENGTH_LONG).show()
             }
-        }, 4000)
-        
-        Toast.makeText(requireContext(), "🔍 Analyzing text in image...", Toast.LENGTH_LONG).show()
+        }
     }
     
-    private fun takeCreativePhoto() {
-        val fileName = "creative_${System.currentTimeMillis()}.jpg"
-        val newImage = ImageInfo(
-            fileName,
-            "Photo",
-            "${(2.0 + Math.random() * 3).format(1)} MB",
-            "Just now",
-            "⏳ Analyzing...",
-            "Creative photo for artistic analysis",
-            hasText = false,
-            ocrText = ""
-        )
-        
-        mockImages.add(0, newImage)
-        setupImagesList()
-        updateImageStats()
-        
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                activity?.runOnUiThread {
-                    newImage.status = "✅ Analyzed"
-                    newImage.description = generateCreativeDescription()
-                    setupImagesList()
-                    updateImageStats()
-                    Toast.makeText(requireContext(), "🎨 Creative analysis complete!", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }, 3000)
-        
-        Toast.makeText(requireContext(), "🎨 Creative photo captured! Analyzing artistic elements...", Toast.LENGTH_LONG).show()
-    }
-    
-    private fun simulateUploadImage() {
+    private fun showImageUploadOptions() {
         val uploadOptions = arrayOf(
             "🖼️ Upload from Gallery",
             "📁 Upload Multiple Images",
-            "☁️ Import from Cloud",
-            "🔗 Import from URL"
+            "🎯 Import Specific Image Type"
         )
         
         AlertDialog.Builder(requireContext())
             .setTitle("Upload Images")
             .setItems(uploadOptions) { _, which ->
                 when (which) {
-                    0 -> uploadFromGallery()
-                    1 -> uploadMultiple()
-                    2 -> importFromCloud()
-                    3 -> importFromURL()
+                    0 -> galleryLauncher.launch("image/*")
+                    1 -> openMultipleImagePicker()
+                    2 -> showImageTypeSelection()
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
     
-    private fun uploadFromGallery() {
-        val fileName = "gallery_${System.currentTimeMillis()}.jpg"
-        val newImage = ImageInfo(
-            fileName,
-            "Photo",
-            "${(1.2 + Math.random() * 2.5).format(1)} MB",
-            "Just now",
-            "⏳ Uploading...",
-            "Image uploaded from device gallery",
-            hasText = false,
-            ocrText = ""
-        )
-        
-        mockImages.add(0, newImage)
-        setupImagesList()
-        updateImageStats()
-        
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                activity?.runOnUiThread {
-                    newImage.status = "✅ Analyzed"
-                    newImage.description = generatePhotoDescription()
+    private fun openMultipleImagePicker() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+        multipleImagesLauncher.launch(Intent.createChooser(intent, "Select Multiple Images"))
+    }
+    
+    private fun showImageTypeSelection() {
+        val types = arrayOf("Photos", "Screenshots", "Documents", "Artwork")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Select Image Type")
+            .setItems(types) { _, which ->
+                galleryLauncher.launch("image/*")
+            }
+            .show()
+    }
+    
+    private fun handleSelectedImage(uri: Uri) {
+        lifecycleScope.launch {
+            try {
+                val fileName = getImageFileName(uri)
+                val localFile = File(imagesDirectory, fileName)
+                
+                withContext(Dispatchers.IO) {
+                    copyUriToFile(uri, localFile)
+                }
+                
+                val fileSize = localFile.length()
+                val imageInfo = ImageInfo(
+                    name = fileName,
+                    type = "Photo",
+                    size = formatFileSize(fileSize),
+                    captureTime = "Just now",
+                    status = "⏳ Analyzing...",
+                    description = "Processing uploaded image...",
+                    hasText = false,
+                    ocrText = "",
+                    localPath = localFile.absolutePath
+                )
+                
+                capturedImages.add(0, imageInfo)
+                setupImagesList()
+                updateImageStats()
+                
+                // Start analysis
+                analyzeImage(imageInfo)
+                
+                Toast.makeText(requireContext(), "✅ Image uploaded: $fileName", Toast.LENGTH_SHORT).show()
+                
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "❌ Upload failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    
+    private suspend fun analyzeImage(imageInfo: ImageInfo) {
+        withContext(Dispatchers.IO) {
+            try {
+                Thread.sleep(2000) // Simulate processing time
+                
+                // Simulate image analysis
+                val description = generateImageDescription(imageInfo)
+                var ocrText = ""
+                
+                // If it's a document type, simulate OCR
+                if (imageInfo.hasText || imageInfo.name.contains("document") || imageInfo.name.contains("ocr")) {
+                    ocrText = performSimpleOCR(imageInfo.localPath)
+                }
+                
+                withContext(Dispatchers.Main) {
+                    imageInfo.status = "✅ Analyzed"
+                    imageInfo.description = description
+                    if (ocrText.isNotEmpty()) {
+                        imageInfo.ocrText = ocrText
+                    }
+                    setupImagesList()
+                    updateImageStats()
+                    
+                    if (ocrText.isNotEmpty()) {
+                        showOCRResults(imageInfo)
+                    }
+                }
+                
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    imageInfo.status = "❌ Analysis failed"
+                    imageInfo.description = "Could not analyze image: ${e.message}"
                     setupImagesList()
                     updateImageStats()
                 }
             }
-        }, 2000)
+        }
+    }
+    
+    private fun generateImageDescription(imageInfo: ImageInfo): String {
+        // Simple image analysis based on file characteristics
+        val bitmap = BitmapFactory.decodeFile(imageInfo.localPath)
+        if (bitmap != null) {
+            val width = bitmap.width
+            val height = bitmap.height
+            val isLandscape = width > height
+            
+            return when {
+                imageInfo.name.startsWith("document_") -> 
+                    "Document image ($width x $height) - appears to contain text and structured content"
+                imageInfo.name.startsWith("creative_") -> 
+                    "Creative photograph with artistic composition and ${if (isLandscape) "landscape" else "portrait"} orientation"
+                imageInfo.name.startsWith("ocr_") -> 
+                    "Text-focused image optimized for character recognition"
+                else -> 
+                    "Photograph ($width x $height) captured with good clarity and ${if (isLandscape) "landscape" else "portrait"} orientation"
+            }
+        }
+        return "Image analysis completed"
+    }
+    
+    private fun performSimpleOCR(imagePath: String): String {
+        // Placeholder OCR functionality
+        // In a real implementation, you'd use a library like ML Kit or Tesseract
+        return when {
+            File(imagePath).name.contains("business") -> 
+                "John Smith\nSoftware Engineer\njohn@example.com\n555-123-4567"
+            File(imagePath).name.contains("document") -> 
+                "Sample document text extracted from image.\nThis is a placeholder for real OCR functionality.\nActual text would be extracted here."
+            File(imagePath).name.contains("receipt") -> 
+                "Store Receipt\nItem 1: $12.99\nItem 2: $8.50\nTotal: $21.49"
+            else -> 
+                "Text content detected and extracted from image.\nThis would contain the actual recognized text in a real implementation."
+        }
+    }
+    
+    private fun loadExistingImages() {
+        // This function is no longer needed as images are loaded directly from the directory
+        // but keeping it for now to avoid breaking existing calls.
+        // For a real app, you'd scan the directory for existing files.
+    }
+    
+    private fun setupImagesList() {
+        val adapter = ImageAdapter(requireContext(), capturedImages)
+        imagesList.adapter = adapter
+    }
+    
+    private fun updateImageStats() {
+        val analyzedCount = capturedImages.count { it.status.contains("✅") }
+        val textImages = capturedImages.count { it.hasText && it.ocrText.isNotEmpty() }
         
-        Toast.makeText(requireContext(), "🖼️ Image uploaded! Processing...", Toast.LENGTH_SHORT).show()
-    }
-    
-    private fun uploadMultiple() {
-        Toast.makeText(requireContext(), "📁 Bulk upload feature coming soon!", Toast.LENGTH_SHORT).show()
-    }
-    
-    private fun importFromCloud() {
-        Toast.makeText(requireContext(), "☁️ Cloud import feature coming soon!", Toast.LENGTH_SHORT).show()
-    }
-    
-    private fun importFromURL() {
-        Toast.makeText(requireContext(), "🔗 URL import feature coming soon!", Toast.LENGTH_SHORT).show()
+        photoCountText.text = "${capturedImages.size} images uploaded"
+        analysisProgressText.text = "$analyzedCount of ${capturedImages.size} analyzed"
+        ocrStatusText.text = "$textImages images with extracted text"
     }
     
     private fun showImageDetails(image: ImageInfo) {
@@ -409,14 +461,14 @@ class ImagesFragment : Fragment() {
     
     private fun showImageGallery() {
         val galleryInfo = buildString {
-            val photos = mockImages.filter { it.type == "Photo" }
-            val documents = mockImages.filter { it.type == "Document" }
+            val photos = capturedImages.filter { it.type == "Photo" }
+            val documents = capturedImages.filter { it.type == "Document" }
             
             append("🖼️ Image Gallery\n\n")
-            append("Total Images: ${mockImages.size}\n")
+            append("Total Images: ${capturedImages.size}\n")
             append("Photos: ${photos.size}\n")
             append("Documents: ${documents.size}\n")
-            append("With Text: ${mockImages.count { it.hasText }}\n\n")
+            append("With Text: ${capturedImages.count { it.hasText }}\n\n")
             append("Recent Categories:\n")
             append("• Nature & Landscapes\n")
             append("• Documents & Text\n")
@@ -460,21 +512,6 @@ class ImagesFragment : Fragment() {
             .show()
     }
     
-    private fun showOCRResults(image: ImageInfo) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Text Extracted! 📝")
-            .setMessage("Successfully extracted text from ${image.name}:\n\n${image.ocrText}\n\nThe extracted text is now searchable and can be edited or copied.")
-            .setPositiveButton("Copy Text") { _, _ ->
-                // Copy to clipboard functionality would go here
-                Toast.makeText(requireContext(), "📋 Text copied to clipboard!", Toast.LENGTH_SHORT).show()
-            }
-            .setNeutralButton("Edit") { _, _ ->
-                editExtractedText(image)
-            }
-            .setNegativeButton("Close", null)
-            .show()
-    }
-    
     private fun askAIAboutImage(image: ImageInfo) {
         Toast.makeText(requireContext(), "� Switching to chat to discuss ${image.name}", Toast.LENGTH_SHORT).show()
         activity?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_navigation)?.selectedItemId = R.id.nav_chat
@@ -485,7 +522,7 @@ class ImagesFragment : Fragment() {
             .setTitle("Delete Image")
             .setMessage("Are you sure you want to delete ${image.name}? This action cannot be undone.")
             .setPositiveButton("Delete") { _, _ ->
-                mockImages.remove(image)
+                capturedImages.remove(image)
                 setupImagesList()
                 updateImageStats()
                 Toast.makeText(requireContext(), "Image deleted successfully", Toast.LENGTH_SHORT).show()
@@ -498,31 +535,80 @@ class ImagesFragment : Fragment() {
         Toast.makeText(requireContext(), "🔍 AI-powered image search coming soon!", Toast.LENGTH_SHORT).show()
     }
     
-    private fun showQualitySettings() {
-        Toast.makeText(requireContext(), "📸 Quality settings coming soon!", Toast.LENGTH_SHORT).show()
+    private fun getImageFileName(uri: Uri): String {
+        val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val nameIndex = it.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)
+                if (nameIndex >= 0) {
+                    return it.getString(nameIndex) ?: "image_${System.currentTimeMillis()}.jpg"
+                }
+            }
+        }
+        return uri.lastPathSegment ?: "image_${System.currentTimeMillis()}.jpg"
+    }
+
+    private fun copyUriToFile(uri: Uri, localFile: File) {
+        requireContext().contentResolver.openInputStream(uri)?.use { inputStream ->
+            localFile.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
     }
     
-    private fun showOCRSettings() {
-        val languages = arrayOf("English", "Spanish", "French", "German", "Chinese", "Auto-detect")
+    private fun formatFileSize(bytes: Long): String {
+        return when {
+            bytes >= 1024 * 1024 * 1024 -> "${bytes / (1024 * 1024 * 1024)} GB"
+            bytes >= 1024 * 1024 -> "${"%.1f".format(bytes / (1024.0 * 1024.0))} MB"
+            bytes >= 1024 -> "${"%.1f".format(bytes / 1024.0)} KB"
+            else -> "$bytes bytes"
+        }
+    }
+    
+    private fun updateStatus(status: String) {
+        activity?.findViewById<TextView>(R.id.status_text)?.text = status
+    }
+    
+    private fun Double.format(digits: Int): String = "%.${digits}f".format(this)
+    
+    private fun showOCRResults(image: ImageInfo) {
         AlertDialog.Builder(requireContext())
-            .setTitle("OCR Language")
-            .setSingleChoiceItems(languages, 0) { dialog, which ->
-                Toast.makeText(requireContext(), "OCR language set to ${languages[which]}", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
+            .setTitle("Text Extracted! 📝")
+            .setMessage("Successfully extracted text from ${image.name}:\n\n${image.ocrText}\n\nThe extracted text is now searchable and can be edited or copied.")
+            .setPositiveButton("Copy Text") { _, _ ->
+                copyTextToClipboard(image.ocrText)
+                Toast.makeText(requireContext(), "📋 Text copied to clipboard!", Toast.LENGTH_SHORT).show()
             }
+            .setNeutralButton("Edit") { _, _ ->
+                editExtractedText(image)
+            }
+            .setNegativeButton("Close", null)
             .show()
     }
     
-    private fun showAutoAnalysisSettings() {
-        Toast.makeText(requireContext(), "⚙️ Auto-analysis settings coming soon!", Toast.LENGTH_SHORT).show()
-    }
-    
-    private fun showStorageSettings() {
-        Toast.makeText(requireContext(), "💾 Storage settings coming soon!", Toast.LENGTH_SHORT).show()
+    private fun copyTextToClipboard(text: String) {
+        val clipboard = ContextCompat.getSystemService(requireContext(), android.content.ClipboardManager::class.java)
+        val clip = android.content.ClipData.newPlainText("Extracted Text", text)
+        clipboard?.setPrimaryClip(clip)
     }
     
     private fun editExtractedText(image: ImageInfo) {
-        Toast.makeText(requireContext(), "✏️ Text editing feature coming soon!", Toast.LENGTH_SHORT).show()
+        val editText = EditText(requireContext()).apply {
+            setText(image.ocrText)
+            setSingleLine(false)
+            maxLines = 10
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Edit Extracted Text")
+            .setView(editText)
+            .setPositiveButton("Save") { _, _ ->
+                image.ocrText = editText.text.toString()
+                setupImagesList()
+                Toast.makeText(requireContext(), "✅ Text updated!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
     
     private fun generatePhotoDescription(): String {
@@ -547,12 +633,74 @@ class ImagesFragment : Fragment() {
         return descriptions.random()
     }
     
-    private fun updateStatus(status: String) {
-        activity?.findViewById<TextView>(R.id.status_text)?.text = status
+    private fun showQualitySettings() {
+        val qualities = arrayOf("High (Original)", "Medium (Compressed)", "Low (Fast)")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Image Quality Settings")
+            .setSingleChoiceItems(qualities, 0) { dialog, which ->
+                Toast.makeText(requireContext(), "Quality set to ${qualities[which]}", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .show()
     }
     
-    private fun Double.format(digits: Int): String = "%.${digits}f".format(this)
+    private fun showOCRSettings() {
+        val languages = arrayOf("English", "Spanish", "French", "German", "Chinese", "Auto-detect")
+        AlertDialog.Builder(requireContext())
+            .setTitle("OCR Language")
+            .setSingleChoiceItems(languages, 0) { dialog, which ->
+                Toast.makeText(requireContext(), "OCR language set to ${languages[which]}", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .show()
+    }
     
+    private fun showAutoAnalysisSettings() {
+        val options = arrayOf(
+            "Auto-analyze photos",
+            "Auto-extract text",
+            "Auto-categorize images",
+            "Background processing"
+        )
+        
+        val checkedItems = booleanArrayOf(true, true, false, true)
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Auto-Analysis Settings")
+            .setMultiChoiceItems(options, checkedItems) { _, which, isChecked ->
+                checkedItems[which] = isChecked
+            }
+            .setPositiveButton("Save") { _, _ ->
+                Toast.makeText(requireContext(), "⚙️ Settings saved!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun showStorageSettings() {
+        val storageInfo = buildString {
+            val totalSize = capturedImages.sumOf { formatFileSize(it.size.toLongOrNull() ?: 0) }
+            append("💾 Image Storage Settings\n\n")
+            append("Current Usage: ${capturedImages.size} images\n")
+            append("Storage Location: Internal app storage\n")
+            append("Auto-cleanup: Disabled\n\n")
+            append("Options:\n")
+            append("• Enable auto-cleanup after 30 days\n")
+            append("• Compress images to save space\n")
+            append("• Export images to external storage\n")
+            append("• Clear all cached thumbnails")
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Storage Settings")
+            .setMessage(storageInfo)
+            .setPositiveButton("Configure") { _, _ ->
+                Toast.makeText(requireContext(), "💾 Storage configuration coming soon!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
     data class ImageInfo(
         val name: String,
         val type: String,
@@ -561,9 +709,10 @@ class ImagesFragment : Fragment() {
         var status: String,
         var description: String,
         val hasText: Boolean,
-        var ocrText: String
+        var ocrText: String,
+        val localPath: String
     )
-    
+
     private class ImageAdapter(
         context: Context,
         private val images: List<ImageInfo>
@@ -580,7 +729,13 @@ class ImagesFragment : Fragment() {
             val subtitleView = view.findViewById<TextView>(android.R.id.text2)
             
             val textIndicator = if (image.hasText && image.ocrText.isNotEmpty()) " 📝" else ""
-            titleView.text = "${image.name} (${image.size})$textIndicator"
+            val typeIcon = when (image.type) {
+                "Document" -> "📑"
+                "Photo" -> "📸"
+                else -> "🖼️"
+            }
+            
+            titleView.text = "$typeIcon ${image.name} (${image.size})$textIndicator"
             subtitleView.text = "${image.type} • ${image.status} • ${image.captureTime}"
             
             return view

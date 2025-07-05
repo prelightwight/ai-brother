@@ -1,11 +1,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Essential permissions only -->
+    <!-- Essential permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- Camera and file access permissions -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="28" />
     
     <!-- For MIUI compatibility -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    
+    <!-- Camera feature (optional for broader device compatibility) -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     
     <application
         android:label="@string/app_name"
@@ -13,6 +23,7 @@
         android:theme="@style/AppTheme"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
+        android:requestLegacyExternalStorage="true"
         tools:targetApi="28">
         
         <activity
@@ -24,6 +35,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <!-- FileProvider for camera functionality -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.prelightwight.aibrother.fileprovider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
     </application>
 
 </manifest>
