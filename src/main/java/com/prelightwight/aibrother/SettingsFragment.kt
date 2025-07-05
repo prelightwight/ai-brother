@@ -1,6 +1,7 @@
 package com.prelightwight.aibrother
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,7 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class SettingsFragment : Fragment() {
     
@@ -262,8 +269,7 @@ class SettingsFragment : Fragment() {
         }
         
         exportDataButton.setOnClickListener {
-            // TODO: Implement data export functionality
-            Toast.makeText(requireContext(), "📁 Export functionality coming soon!", Toast.LENGTH_SHORT).show()
+            showExportDataDialog()
         }
         
         resetSettingsButton.setOnClickListener {
@@ -411,6 +417,182 @@ class SettingsFragment : Fragment() {
         mainActivity?.let { activity ->
             val tutorialManager = TutorialManager(activity)
             tutorialManager.startTutorialFromSettings()
+        }
+    }
+    
+    private fun showExportDataDialog() {
+        val exportOptions = arrayOf(
+            "📁 Export All Data",
+            "💬 Export Conversations Only",
+            "⚙️ Export Settings Only",
+            "📄 Export Processed Files List",
+            "📊 Generate Privacy Report"
+        )
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Export Data")
+            .setMessage("Choose what data to export:")
+            .setItems(exportOptions) { _, which ->
+                when (which) {
+                    0 -> exportAllData()
+                    1 -> exportConversations()
+                    2 -> exportSettings()
+                    3 -> exportFilesList()
+                    4 -> generatePrivacyReport()
+                }
+            }
+            .setNeutralButton("Import Data") { _, _ ->
+                showImportDataDialog()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun showImportDataDialog() {
+        val importOptions = arrayOf(
+            "📁 Import All Data",
+            "💬 Import Conversations",
+            "⚙️ Import Settings",
+            "🔄 Restore from Backup"
+        )
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Import Data")
+            .setMessage("Choose what data to import:")
+            .setItems(importOptions) { _, which ->
+                when (which) {
+                    0 -> importAllData()
+                    1 -> importConversations()
+                    2 -> importSettings()
+                    3 -> restoreFromBackup()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun exportAllData() {
+        lifecycleScope.launch {
+            try {
+                val exportData = DataExporter.exportAllData(requireContext())
+                saveExportData("ai_brother_full_export", exportData)
+                Toast.makeText(requireContext(), "✅ All data exported successfully!", Toast.LENGTH_LONG).show()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "❌ Export failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    
+    private fun exportConversations() {
+        lifecycleScope.launch {
+            try {
+                val exportData = DataExporter.exportConversations(requireContext())
+                saveExportData("ai_brother_conversations", exportData)
+                Toast.makeText(requireContext(), "✅ Conversations exported successfully!", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "❌ Export failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    
+    private fun exportSettings() {
+        lifecycleScope.launch {
+            try {
+                val exportData = DataExporter.exportSettings(requireContext())
+                saveExportData("ai_brother_settings", exportData)
+                Toast.makeText(requireContext(), "✅ Settings exported successfully!", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "❌ Export failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    
+    private fun exportFilesList() {
+        lifecycleScope.launch {
+            try {
+                val exportData = DataExporter.exportFilesList(requireContext())
+                saveExportData("ai_brother_files", exportData)
+                Toast.makeText(requireContext(), "✅ Files list exported successfully!", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "❌ Export failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    
+    private fun generatePrivacyReport() {
+        lifecycleScope.launch {
+            try {
+                val reportData = DataExporter.generatePrivacyReport(requireContext())
+                saveExportData("ai_brother_privacy_report", reportData)
+                Toast.makeText(requireContext(), "✅ Privacy report generated!", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "❌ Report generation failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    
+    private fun importAllData() {
+        // TODO: Implement file picker for import
+        Toast.makeText(requireContext(), "📁 Import functionality coming soon!", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun importConversations() {
+        Toast.makeText(requireContext(), "💬 Conversation import coming soon!", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun importSettings() {
+        Toast.makeText(requireContext(), "⚙️ Settings import coming soon!", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun restoreFromBackup() {
+        Toast.makeText(requireContext(), "🔄 Backup restore coming soon!", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun saveExportData(fileName: String, data: String) {
+        try {
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val finalFileName = "${fileName}_${timestamp}.json"
+            
+            val exportsDir = File(requireContext().getExternalFilesDir(null), "exports")
+            if (!exportsDir.exists()) exportsDir.mkdirs()
+            
+            val exportFile = File(exportsDir, finalFileName)
+            exportFile.writeText(data)
+            
+            // Show save location
+            AlertDialog.Builder(requireContext())
+                .setTitle("Export Complete ✅")
+                .setMessage("Data exported to:\n${exportFile.absolutePath}\n\nYou can now share or backup this file.")
+                .setPositiveButton("Share File") { _, _ ->
+                    shareExportFile(exportFile)
+                }
+                .setNeutralButton("OK", null)
+                .show()
+                
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "❌ Failed to save export: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    private fun shareExportFile(file: File) {
+        try {
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = "application/json"
+            
+            val uri = FileProvider.getUriForFile(
+                requireContext(),
+                "com.prelightwight.aibrother.fileprovider",
+                file
+            )
+            
+            intent.putExtra(Intent.EXTRA_STREAM, uri)
+            intent.putExtra(Intent.EXTRA_SUBJECT, "AI Brother Data Export")
+            intent.putExtra(Intent.EXTRA_TEXT, "AI Brother data export file")
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            
+            startActivity(Intent.createChooser(intent, "Share Export File"))
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "❌ Failed to share file: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 }

@@ -114,7 +114,6 @@ class ImagesFragment : Fragment() {
     
     private fun loadProcessedImages() {
         processedImages.clear()
-        // Load real processed images from storage
         val savedImages = fileProcessor.getProcessedImages()
         processedImages.addAll(savedImages)
         setupImagesList()
@@ -289,101 +288,6 @@ class ImagesFragment : Fragment() {
         activity?.findViewById<TextView>(R.id.status_text)?.text = status
     }
     
-    private fun askAIAboutImage(image: ProcessedImage) {
-        Toast.makeText(requireContext(), "� Switching to chat to discuss ${image.fileName}", Toast.LENGTH_SHORT).show()
-        activity?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_navigation)?.selectedItemId = R.id.nav_chat
-    }
-    
-    private fun deleteImage(image: ProcessedImage) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Delete Image")
-            .setMessage("Are you sure you want to delete ${image.fileName}? This action cannot be undone.")
-            .setPositiveButton("Delete") { _, _ ->
-                fileProcessor.deleteProcessedFile(image)
-                processedImages.remove(image)
-                setupImagesList()
-                updateImageStats()
-                Toast.makeText(requireContext(), "Image deleted successfully", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-    
-    private fun showQualitySettings() {
-        val qualities = arrayOf("High (Original)", "Medium (Compressed)", "Low (Fast processing)")
-        AlertDialog.Builder(requireContext())
-            .setTitle("Image Quality Settings")
-            .setSingleChoiceItems(qualities, 0) { dialog, which ->
-                Toast.makeText(requireContext(), "Quality set to ${qualities[which]}", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
-            }
-            .show()
-    }
-    
-    private fun showOCRSettings() {
-        val languages = arrayOf("English", "Spanish", "French", "German", "Chinese", "Auto-detect")
-        AlertDialog.Builder(requireContext())
-            .setTitle("OCR Language")
-            .setSingleChoiceItems(languages, 0) { dialog, which ->
-                Toast.makeText(requireContext(), "OCR language set to ${languages[which]}", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
-            }
-            .show()
-    }
-    
-    private fun showAutoAnalysisSettings() {
-        val options = arrayOf("Analyze immediately", "Analyze on WiFi only", "Manual analysis only")
-        AlertDialog.Builder(requireContext())
-            .setTitle("Auto-analysis Settings")
-            .setSingleChoiceItems(options, 0) { dialog, which ->
-                Toast.makeText(requireContext(), "Auto-analysis set to ${options[which]}", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
-            }
-            .show()
-    }
-    
-    private fun showStorageSettings() {
-        val storageInfo = buildString {
-            append("💾 Storage Information\n\n")
-            append("Images stored: ${processedImages.size}\n")
-            append("Storage location: Internal storage\n")
-            append("Auto-cleanup: Disabled\n\n")
-            append("Privacy Settings:\n")
-            append("• All images processed locally\n")
-            append("• No data sent to cloud\n")
-            append("• Metadata preserved\n")
-            append("• Secure deletion available")
-        }
-        
-        AlertDialog.Builder(requireContext())
-            .setTitle("Storage & Privacy")
-            .setMessage(storageInfo)
-            .setPositiveButton("OK", null)
-            .show()
-    }
-    
-    private fun showSearchOptions() {
-        val searchTypes = arrayOf(
-            "� Search by content",
-            "� Search by text",
-            "📅 Search by date",
-            "🏷️ Search by category"
-        )
-        
-        AlertDialog.Builder(requireContext())
-            .setTitle("Search Images")
-            .setItems(searchTypes) { _, which ->
-                when (which) {
-                    0 -> Toast.makeText(requireContext(), "🔍 Content search coming soon!", Toast.LENGTH_SHORT).show()
-                    1 -> Toast.makeText(requireContext(), "� Text search coming soon!", Toast.LENGTH_SHORT).show()
-                    2 -> Toast.makeText(requireContext(), "� Date search coming soon!", Toast.LENGTH_SHORT).show()
-                    3 -> Toast.makeText(requireContext(), "🏷️ Category search coming soon!", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-    
     private fun showImageDetails(image: ProcessedImage) {
         val details = buildString {
             append("🖼️ Image Details\n\n")
@@ -472,32 +376,18 @@ class ImagesFragment : Fragment() {
             .show()
     }
     
-    private fun showOCRResults(image: ImageInfo) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Text Extracted! 📝")
-            .setMessage("Successfully extracted text from ${image.name}:\n\n${image.ocrText}\n\nThe extracted text is now searchable and can be edited or copied.")
-            .setPositiveButton("Copy Text") { _, _ ->
-                // Copy to clipboard functionality would go here
-                Toast.makeText(requireContext(), "📋 Text copied to clipboard!", Toast.LENGTH_SHORT).show()
-            }
-            .setNeutralButton("Edit") { _, _ ->
-                editExtractedText(image)
-            }
-            .setNegativeButton("Close", null)
-            .show()
-    }
-    
-    private fun askAIAboutImage(image: ImageInfo) {
-        Toast.makeText(requireContext(), "� Switching to chat to discuss ${image.name}", Toast.LENGTH_SHORT).show()
+    private fun askAIAboutImage(image: ProcessedImage) {
+        Toast.makeText(requireContext(), "💬 Switching to chat to discuss ${image.fileName}", Toast.LENGTH_SHORT).show()
         activity?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_navigation)?.selectedItemId = R.id.nav_chat
     }
     
-    private fun deleteImage(image: ImageInfo) {
+    private fun deleteImage(image: ProcessedImage) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Image")
-            .setMessage("Are you sure you want to delete ${image.name}? This action cannot be undone.")
+            .setMessage("Are you sure you want to delete ${image.fileName}? This action cannot be undone.")
             .setPositiveButton("Delete") { _, _ ->
-                mockImages.remove(image)
+                fileProcessor.deleteProcessedFile(image)
+                processedImages.remove(image)
                 setupImagesList()
                 updateImageStats()
                 Toast.makeText(requireContext(), "Image deleted successfully", Toast.LENGTH_SHORT).show()
@@ -506,12 +396,15 @@ class ImagesFragment : Fragment() {
             .show()
     }
     
-    private fun showSearchOptions() {
-        Toast.makeText(requireContext(), "🔍 AI-powered image search coming soon!", Toast.LENGTH_SHORT).show()
-    }
-    
     private fun showQualitySettings() {
-        Toast.makeText(requireContext(), "📸 Quality settings coming soon!", Toast.LENGTH_SHORT).show()
+        val qualities = arrayOf("High (Original)", "Medium (Compressed)", "Low (Fast processing)")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Image Quality Settings")
+            .setSingleChoiceItems(qualities, 0) { dialog, which ->
+                Toast.makeText(requireContext(), "Quality set to ${qualities[which]}", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .show()
     }
     
     private fun showOCRSettings() {
@@ -526,55 +419,57 @@ class ImagesFragment : Fragment() {
     }
     
     private fun showAutoAnalysisSettings() {
-        Toast.makeText(requireContext(), "⚙️ Auto-analysis settings coming soon!", Toast.LENGTH_SHORT).show()
+        val options = arrayOf("Analyze immediately", "Analyze on WiFi only", "Manual analysis only")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Auto-analysis Settings")
+            .setSingleChoiceItems(options, 0) { dialog, which ->
+                Toast.makeText(requireContext(), "Auto-analysis set to ${options[which]}", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .show()
     }
     
     private fun showStorageSettings() {
-        Toast.makeText(requireContext(), "💾 Storage settings coming soon!", Toast.LENGTH_SHORT).show()
+        val storageInfo = buildString {
+            append("💾 Storage Information\n\n")
+            append("Images stored: ${processedImages.size}\n")
+            append("Storage location: Internal storage\n")
+            append("Auto-cleanup: Disabled\n\n")
+            append("Privacy Settings:\n")
+            append("• All images processed locally\n")
+            append("• No data sent to cloud\n")
+            append("• Metadata preserved\n")
+            append("• Secure deletion available")
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Storage & Privacy")
+            .setMessage(storageInfo)
+            .setPositiveButton("OK", null)
+            .show()
     }
     
-    private fun editExtractedText(image: ImageInfo) {
-        Toast.makeText(requireContext(), "✏️ Text editing feature coming soon!", Toast.LENGTH_SHORT).show()
-    }
-    
-    private fun generatePhotoDescription(): String {
-        val descriptions = arrayOf(
-            "A vibrant outdoor scene with natural lighting and interesting composition",
-            "Indoor photograph with good lighting and clear subject focus",
-            "Landscape image showing beautiful scenery and natural elements",
-            "Portrait or group photo with people in a casual setting",
-            "Close-up shot with detailed textures and rich colors",
-            "Architectural or urban scene with geometric elements"
+    private fun showSearchOptions() {
+        val searchTypes = arrayOf(
+            "🔍 Search by content",
+            "📝 Search by text",
+            "📅 Search by date",
+            "🏷️ Search by category"
         )
-        return descriptions.random()
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Search Images")
+            .setItems(searchTypes) { _, which ->
+                when (which) {
+                    0 -> Toast.makeText(requireContext(), "🔍 Content search coming soon!", Toast.LENGTH_SHORT).show()
+                    1 -> Toast.makeText(requireContext(), "📝 Text search coming soon!", Toast.LENGTH_SHORT).show()
+                    2 -> Toast.makeText(requireContext(), "📅 Date search coming soon!", Toast.LENGTH_SHORT).show()
+                    3 -> Toast.makeText(requireContext(), "🏷️ Category search coming soon!", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
-    
-    private fun generateCreativeDescription(): String {
-        val descriptions = arrayOf(
-            "Artistic composition with strong visual elements and creative use of light and shadow",
-            "Abstract or experimental image with unique perspective and interesting color palette",
-            "Creative photography with artistic filters and enhanced visual appeal",
-            "Stylized image with artistic elements and creative composition techniques"
-        )
-        return descriptions.random()
-    }
-    
-    private fun updateStatus(status: String) {
-        activity?.findViewById<TextView>(R.id.status_text)?.text = status
-    }
-    
-    private fun Double.format(digits: Int): String = "%.${digits}f".format(this)
-    
-    data class ImageInfo(
-        val name: String,
-        val type: String,
-        val size: String,
-        val captureTime: String,
-        var status: String,
-        var description: String,
-        val hasText: Boolean,
-        var ocrText: String
-    )
     
     private class ProcessedImageAdapter(
         context: Context,
