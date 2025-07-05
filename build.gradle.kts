@@ -21,13 +21,16 @@ android {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
         
-        // Enable native build with llama.cpp integration
+        // TODO: Re-enable native build with llama.cpp integration
+        // Temporarily disabled to build basic APK
+        /*
         externalNativeBuild {
             cmake {
                 cppFlags += listOf("-std=c++17", "-frtti", "-fexceptions")
                 abiFilters += listOf("arm64-v8a")
             }
         }
+        */
     }
 
     buildTypes {
@@ -58,13 +61,16 @@ android {
         viewBinding = true  // Use view binding instead of Compose
     }
 
-    // Enable native build configuration for llama.cpp
+    // TODO: Re-enable native build configuration for llama.cpp
+    // Temporarily disabled to build basic APK
+    /*
     externalNativeBuild {
         cmake {
             path = file("CMakeLists.txt")
             version = "3.22.1"
         }
     }
+    */
 
     packaging {
         resources {

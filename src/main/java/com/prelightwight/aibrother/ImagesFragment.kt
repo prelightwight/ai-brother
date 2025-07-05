@@ -679,9 +679,11 @@ class ImagesFragment : Fragment() {
     
     private fun showStorageSettings() {
         val storageInfo = buildString {
-            val totalSize = capturedImages.sumOf { formatFileSize(it.size.toLongOrNull() ?: 0) }
+            val totalSizeBytes = capturedImages.sumOf { it.size.toLongOrNull() ?: 0L }
+            val totalSize = formatFileSize(totalSizeBytes)
             append("💾 Image Storage Settings\n\n")
             append("Current Usage: ${capturedImages.size} images\n")
+            append("Total Size: $totalSize\n")
             append("Storage Location: Internal app storage\n")
             append("Auto-cleanup: Disabled\n\n")
             append("Options:\n")

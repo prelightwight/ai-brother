@@ -618,7 +618,7 @@ class FilesFragment : Fragment() {
         var size: Long = 0
         val inputStream: InputStream? = requireContext().contentResolver.openInputStream(uri)
         inputStream?.use {
-            size = it.available()
+            size = it.available().toLong()
         }
         return size
     }
