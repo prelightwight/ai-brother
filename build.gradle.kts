@@ -11,8 +11,8 @@ android {
         applicationId = "com.prelightwight.aibrother"
         minSdk = 21
         targetSdk = 28
-        versionCode = 4  // Updated version
-        versionName = "1.1.0"
+        versionCode = 5  // Updated version
+        versionName = "2.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
@@ -21,16 +21,13 @@ android {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
         
-        // TODO: Re-enable native build with llama.cpp integration
-        // Temporarily disabled to build basic APK
-        /*
+        // Re-enabled native build with llama.cpp integration
         externalNativeBuild {
             cmake {
                 cppFlags += listOf("-std=c++17", "-frtti", "-fexceptions")
                 abiFilters += listOf("arm64-v8a")
             }
         }
-        */
     }
 
     buildTypes {
@@ -61,16 +58,13 @@ android {
         viewBinding = true  // Use view binding instead of Compose
     }
 
-    // TODO: Re-enable native build configuration for llama.cpp
-    // Temporarily disabled to build basic APK
-    /*
+    // Re-enabled native build configuration for llama.cpp
     externalNativeBuild {
         cmake {
             path = file("CMakeLists.txt")
-            version = "3.22.1"
+            // Use system CMake instead of fixed version
         }
     }
-    */
 
     packaging {
         resources {
