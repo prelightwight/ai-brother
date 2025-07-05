@@ -128,10 +128,12 @@ class ImagesFragment : Fragment() {
 
     private fun setupButtons() {
         takePhotoBtn.setOnClickListener {
+            // Direct camera access for better user experience
             checkCameraPermissionAndTakePhoto()
         }
         
         uploadImageBtn.setOnClickListener {
+            // Direct gallery access for better user experience
             showImageUploadOptions()
         }
         
@@ -156,9 +158,12 @@ class ImagesFragment : Fragment() {
                 requireContext(),
                 Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED -> {
+                // Permission already granted, show camera options
                 openCameraOptions()
             }
             else -> {
+                // Request permission
+                updateStatus("📷 Requesting camera permission...")
                 cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
             }
         }
@@ -167,7 +172,7 @@ class ImagesFragment : Fragment() {
     private fun openCameraOptions() {
         val cameraOptions = arrayOf(
             "📸 Take Photo",
-            "📑 Scan Document",
+            "📑 Scan Document", 
             "🔍 Analyze Text (OCR)",
             "🎨 Creative Photo"
         )
@@ -189,6 +194,8 @@ class ImagesFragment : Fragment() {
     
     private fun takePhoto(type: String) {
         try {
+            updateStatus("📷 Opening camera...")
+            
             val photoFile = createImageFile(type)
             val photoURI = FileProvider.getUriForFile(
                 requireContext(),
@@ -197,7 +204,9 @@ class ImagesFragment : Fragment() {
             )
             currentPhotoPath = photoFile.absolutePath
             cameraLauncher.launch(photoURI)
+            
         } catch (e: Exception) {
+            updateStatus("❌ Camera error")
             Toast.makeText(requireContext(), "Error opening camera: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
@@ -253,21 +262,39 @@ class ImagesFragment : Fragment() {
     private fun showImageUploadOptions() {
         val uploadOptions = arrayOf(
             "🖼️ Upload from Gallery",
-            "📁 Upload Multiple Images",
+            "📁 Upload Multiple Images", 
             "🎯 Import Specific Image Type"
         )
         
         AlertDialog.Builder(requireContext())
             .setTitle("Upload Images")
             .setItems(uploadOptions) { _, which ->
-                when (which) {
-                    0 -> galleryLauncher.launch("image/*")
-                    1 -> openMultipleImagePicker()
-                    2 -> showImageTypeSelection()
+                try {
+                    when (which) {
+                        0 -> {
+                            updateStatus("📂 Opening gallery...")
+                            galleryLauncher.launch("image/*")
+                        }
+                        1 -> {
+                            updateStatus("📂 Opening multiple image picker...")
+                            openMultipleImagePicker()
+                        }
+                        2 -> {
+                            updateStatus("📂 Opening image type selector...")
+                            showImageTypeSelection()
+                        }
+                    }
+                } catch (e: Exception) {
+                    updateStatus("❌ Error opening image picker")
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+    
+    private fun updateStatus(message: String) {
+        activity?.findViewById<TextView>(R.id.status_text)?.text = message
     }
     
     private fun openMultipleImagePicker() {
@@ -565,9 +592,7 @@ class ImagesFragment : Fragment() {
         }
     }
     
-    private fun updateStatus(status: String) {
-        activity?.findViewById<TextView>(R.id.status_text)?.text = status
-    }
+
     
     private fun Double.format(digits: Int): String = "%.${digits}f".format(this)
     

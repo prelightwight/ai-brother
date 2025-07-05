@@ -38,31 +38,21 @@ class FilesFragment : Fragment() {
     private val uploadedFiles = mutableListOf<FileInfo>()
     private lateinit var filesDirectory: File
     
-    // Activity result launcher for file picking
+    // Simplified file picker launcher that should always work
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { uri ->
-                handleSelectedFile(uri)
-            }
-        }
-    }
-    
-    // Activity result launcher for multiple files
-    private val multipleFilePickerLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.let { data ->
+            val data = result.data
+            if (data != null) {
+                // Handle multiple files if present
                 if (data.clipData != null) {
-                    // Multiple files selected
                     val clipData = data.clipData!!
                     for (i in 0 until clipData.itemCount) {
                         handleSelectedFile(clipData.getItemAt(i).uri)
                     }
                 } else if (data.data != null) {
-                    // Single file selected
+                    // Handle single file
                     handleSelectedFile(data.data!!)
                 }
             }
@@ -107,6 +97,7 @@ class FilesFragment : Fragment() {
     
     private fun setupButtons() {
         uploadFileBtn.setOnClickListener {
+            // Simplified approach - directly open file picker
             showFileUploadOptions()
         }
         
@@ -132,7 +123,7 @@ class FilesFragment : Fragment() {
     private fun showFileUploadOptions() {
         val fileTypes = arrayOf(
             "📄 Documents (PDF, Word, Text)",
-            "📊 Spreadsheets (Excel, CSV)",
+            "📊 Spreadsheets (Excel, CSV)", 
             "🖼️ Images (JPG, PNG)",
             "📁 Multiple Files",
             "📱 Any File Type"
@@ -143,78 +134,75 @@ class FilesFragment : Fragment() {
             .setMessage("What type of file would you like to upload?")
             .setItems(fileTypes) { _, which ->
                 when (which) {
-                    0 -> openDocumentPicker()
-                    1 -> openSpreadsheetPicker()
-                    2 -> openImagePicker()
-                    3 -> openMultipleFilePicker()
-                    4 -> openAnyFilePicker()
+                    0 -> openFilePicker("documents")
+                    1 -> openFilePicker("spreadsheets") 
+                    2 -> openFilePicker("images")
+                    3 -> openFilePicker("multiple")
+                    4 -> openFilePicker("any")
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
     
-    private fun openDocumentPicker() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "*/*"
-            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
-                "application/pdf",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "text/plain",
-                "text/rtf"
-            ))
-            addCategory(Intent.CATEGORY_OPENABLE)
+    private fun openFilePicker(type: String) {
+        try {
+            val intent = when (type) {
+                "documents" -> Intent(Intent.ACTION_GET_CONTENT).apply {
+                    this.type = "*/*"
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
+                        "application/pdf",
+                        "application/msword", 
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        "text/plain",
+                        "text/rtf"
+                    ))
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                }
+                "spreadsheets" -> Intent(Intent.ACTION_GET_CONTENT).apply {
+                    this.type = "*/*"
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
+                        "application/vnd.ms-excel",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+                        "text/csv"
+                    ))
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                }
+                "images" -> Intent(Intent.ACTION_GET_CONTENT).apply {
+                    this.type = "image/*"
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                }
+                "multiple" -> Intent(Intent.ACTION_GET_CONTENT).apply {
+                    this.type = "*/*"
+                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                }
+                else -> Intent(Intent.ACTION_GET_CONTENT).apply {
+                    this.type = "*/*"
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                }
+            }
+            
+            // Show immediate feedback
+            updateStatus("📂 Opening file picker...")
+            
+            // Launch the file picker
+            filePickerLauncher.launch(Intent.createChooser(intent, "Select File"))
+            
+        } catch (e: Exception) {
+            updateStatus("❌ Error opening file picker")
+            Toast.makeText(requireContext(), "Error opening file picker: ${e.message}", Toast.LENGTH_LONG).show()
         }
-        filePickerLauncher.launch(Intent.createChooser(intent, "Select Document"))
-    }
-    
-    private fun openSpreadsheetPicker() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "*/*"
-            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
-                "application/vnd.ms-excel",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "text/csv"
-            ))
-            addCategory(Intent.CATEGORY_OPENABLE)
-        }
-        filePickerLauncher.launch(Intent.createChooser(intent, "Select Spreadsheet"))
-    }
-    
-    private fun openImagePicker() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "image/*"
-            addCategory(Intent.CATEGORY_OPENABLE)
-        }
-        filePickerLauncher.launch(Intent.createChooser(intent, "Select Image"))
-    }
-    
-    private fun openMultipleFilePicker() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "*/*"
-            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            addCategory(Intent.CATEGORY_OPENABLE)
-        }
-        multipleFilePickerLauncher.launch(Intent.createChooser(intent, "Select Multiple Files"))
-    }
-    
-    private fun openAnyFilePicker() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "*/*"
-            addCategory(Intent.CATEGORY_OPENABLE)
-        }
-        filePickerLauncher.launch(Intent.createChooser(intent, "Select Any File"))
     }
     
     private fun handleSelectedFile(uri: Uri) {
         lifecycleScope.launch {
             try {
+                updateStatus("📄 Processing file...")
+                
                 val fileName = getFileName(uri) ?: "unknown_file_${System.currentTimeMillis()}"
                 val fileSize = getFileSize(uri)
                 val fileType = getFileType(fileName)
-                
-                updateStatus("📄 Processing ${fileName}...")
                 
                 // Copy file to app directory
                 val localFile = File(filesDirectory, fileName)
@@ -239,6 +227,7 @@ class FilesFragment : Fragment() {
                 // Start analysis
                 analyzeFile(fileInfo)
                 
+                updateStatus("✅ File uploaded successfully")
                 Toast.makeText(requireContext(), "✅ File uploaded: $fileName", Toast.LENGTH_SHORT).show()
                 
             } catch (e: Exception) {
@@ -246,6 +235,10 @@ class FilesFragment : Fragment() {
                 Toast.makeText(requireContext(), "❌ Upload failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
+    }
+    
+    private fun updateStatus(message: String) {
+        activity?.findViewById<TextView>(R.id.status_text)?.text = message
     }
     
     private suspend fun analyzeFile(fileInfo: FileInfo) {
@@ -283,8 +276,7 @@ class FilesFragment : Fragment() {
     
     private fun extractTextFromPDF(filePath: String): String {
         // Simple PDF text extraction placeholder
-        // In a real implementation, you'd use a PDF library like iText or PDFBox
-        return "PDF content extracted from ${File(filePath).name}\n\nThis is a placeholder for PDF text extraction. In a full implementation, this would use a PDF library to extract actual text content from the PDF file."
+        return "PDF content extracted from ${File(filePath).name}\\n\\nThis is a placeholder for PDF text extraction. In a full implementation, this would use a PDF library to extract actual text content from the PDF file."
     }
     
     private fun generateFileSummary(content: String, fileType: String): String {
@@ -311,7 +303,7 @@ class FilesFragment : Fragment() {
                 type = fileType,
                 size = formatFileSize(fileSize),
                 uploadTime = uploadTime,
-                status = "✅ Analyzed", // Assuming all existing files are analyzed
+                status = "✅ Analyzed",
                 summary = "File content available for AI search",
                 localPath = file.absolutePath
             ))
@@ -581,10 +573,6 @@ class FilesFragment : Fragment() {
     
     private fun showPrivacySettings() {
         Toast.makeText(requireContext(), "🔒 Privacy settings coming soon!", Toast.LENGTH_SHORT).show()
-    }
-    
-    private fun updateStatus(status: String) {
-        activity?.findViewById<TextView>(R.id.status_text)?.text = status
     }
     
     private fun parseFileSize(sizeStr: String): Long {
